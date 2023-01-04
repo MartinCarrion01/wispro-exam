@@ -6,7 +6,9 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :providers do
-        resources :plans
+        member do
+          resources :plans, param: :plan_id
+        end
       end
     end
   end
