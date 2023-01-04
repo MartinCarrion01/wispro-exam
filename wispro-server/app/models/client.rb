@@ -5,4 +5,7 @@ class Client < ApplicationRecord
     validates :first_name, presence: true
     validates :last_name, presence: true
     validates :password, length: {in: 8..20}, if: -> { new_record? || !password.nil? }
+
+    has many :service_requests
+    has_many :plans, through: :service_requests
 end
