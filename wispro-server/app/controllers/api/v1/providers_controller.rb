@@ -38,7 +38,6 @@ class Api::V1::ProvidersController < ApplicationController
     end
 
     private
-
     def provider_params
         params.require(:provider).permit(:name)
     end

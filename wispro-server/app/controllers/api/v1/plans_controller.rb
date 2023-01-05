@@ -1,12 +1,17 @@
 class Api::V1::PlansController < ApplicationController
     include SetProvider
     
-    before_action :authenticate_request, only: %i[require]
-    before_action :set_provider, only: %i[create update destroy require]
-    before_action :set_plan, only: %i[update destroy require]
+    before_action :set_provider, only: %i[create update destroy]
+    before_action :set_plan, only: %i[update destroy]
 
     def index
-        plans = Plan.index
+        if params[:id].present?
+            set_provider
+            render(json: {plans: @provider.plans}, status: :ok)
+        else
+            plans = Plans.all
+            render(json: {plans: plans}, status: :ok)
+        end
     end
 
     def create
@@ -31,19 +36,6 @@ class Api::V1::PlansController < ApplicationController
             render(status: :no_content)
         else
             render_errors_response(@plan)
-        end
-    end
-
-    def require
-        service_request = ServiceRequest.find_or_initialize_by(plan_id: @plan.id, client_id: @current_client.id)
-        if service_request.persisted?
-            render(json: {message: "Ya tiene una o mas solicitudes de contratación existentes, 
-                                    si desea cambiar su plan, realice una solicitud de cambio"}, status: :bad_request)
-        elsif service_request.save
-            render(json: {message: "Su solicitud de contratacion del plan requerido 
-                                    ha sido creada exitosamente, aguarde respuesta del proveedor"}, status: :ok)
-        else
-            render(json: {message: service_request.errors}, status: :unprocessable_entity)
         end
     end
 

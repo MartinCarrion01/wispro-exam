@@ -7,13 +7,11 @@ Rails.application.routes.draw do
     namespace :v1 do
       resources :providers do
         member do
-          resources :plans, param: :plan_id do
-            member do
-              post :require
-            end
-          end
+          resources :plans, param: :plan_id
         end
       end
+      resources :plans, only: %i[index]
+      resources :service_requests
       resources :clients, only: %i[create]
       resources :auth, only: [] do
         collection do
