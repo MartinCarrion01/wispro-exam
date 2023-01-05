@@ -2,8 +2,8 @@ class Api::V1::PlansController < ApplicationController
     include SetProvider
     
     before_action :authenticate_request, only: %i[require]
-    before_action :set_provider, only: %i[create update destroy]
-    before_action :set_plan, only: %i[update destroy]
+    before_action :set_provider, only: %i[create update destroy require]
+    before_action :set_plan, only: %i[update destroy require]
 
     def index
         plans = Plan.index
@@ -14,7 +14,7 @@ class Api::V1::PlansController < ApplicationController
         if @provider.save
             render(json: {plan: plan}, status: :created)
         else
-            render(json: {message: @provider.errors}, status: :unprocessable_entity)
+            render_errors_response(@provider)
         end
     end
 
@@ -22,7 +22,7 @@ class Api::V1::PlansController < ApplicationController
         if @plan.update(plan_params)
             render(json: {plan: @plan}, status: :ok)
         else
-            render(json: {message: @plan.errors}, status: :unprocessable_entity)
+            render_errors_response(@plan)
         end
     end
 
@@ -30,7 +30,7 @@ class Api::V1::PlansController < ApplicationController
         if @plan.destroy
             render(status: :no_content)
         else
-            render(json: {message: @plan.errors}, status: :bad_request)
+            render_errors_response(@plan)
         end
     end
 
@@ -38,12 +38,10 @@ class Api::V1::PlansController < ApplicationController
         service_request = ServiceRequest.find_or_initialize_by(plan_id: @plan.id, client_id: @current_client.id)
         if service_request.persisted?
             render(json: {message: "Ya tiene una o mas solicitudes de contratación existentes, 
-                                    si desea cambiar su plan, realice una solicitud de cambio"}
-                    ,status: :bad_request)
+                                    si desea cambiar su plan, realice una solicitud de cambio"}, status: :bad_request)
         elsif service_request.save
             render(json: {message: "Su solicitud de contratacion del plan requerido 
-                                    ha sido creada exitosamente, aguarde respuesta del proveedor"}
-                    ,status: :ok)
+                                    ha sido creada exitosamente, aguarde respuesta del proveedor"}, status: :ok)
         else
             render(json: {message: service_request.errors}, status: :unprocessable_entity)
         end
@@ -55,7 +53,7 @@ class Api::V1::PlansController < ApplicationController
     end
 
     def set_plan
-        @plan = @provider.plans.where(id: params[:plan_id])
+        @plan = @provider.plans.where(id: params[:plan_id]).first
         if @plan.nil?
             render(json: {message: "El plan solicitado no existe"}, status: :not_found)
             false

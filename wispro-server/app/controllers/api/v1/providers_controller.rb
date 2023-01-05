@@ -17,7 +17,7 @@ class Api::V1::ProvidersController < ApplicationController
         if provider.save
             render(json: {provider: provider}, status: :created)
         else
-            render(json: {message: provider.errors}, status: :unprocessable_entity)
+            render_errors_response(provider)
         end
     end
 
@@ -25,7 +25,7 @@ class Api::V1::ProvidersController < ApplicationController
         if @provider.update(provider_params)
             render(json: {provider: @provider}, status: :ok)
         else
-            render(json: {message: @provider.errors}, status: :unprocessable_entity)
+            render_errors_response(@provider)
         end
     end
 
@@ -33,7 +33,7 @@ class Api::V1::ProvidersController < ApplicationController
         if @provider.destroy
             render(status: :no_content)
         else
-            render(json: {message: @provider.errors}, status: :bad_request)
+            render_errors_response(@provider)
         end
     end
 

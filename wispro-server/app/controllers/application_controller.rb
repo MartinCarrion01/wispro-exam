@@ -1,8 +1,7 @@
 class ApplicationController < ActionController::API
     include JsonWebToken
     
-    private
-    def decode_header
+    def authenticate_request
         header = request.headers['Authorization']
         header = header.split(' ').last if header
         begin
@@ -11,5 +10,9 @@ class ApplicationController < ActionController::API
         rescue JWT::DecodeError => e
             render json: { errors: e.message }, status: :unauthorized
         end
+    end
+
+    def render_errors_response(object)
+        render(json: {message: object.errors}, status: :bad_request)
     end
 end
