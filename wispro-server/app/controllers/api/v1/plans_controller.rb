@@ -9,7 +9,7 @@ class Api::V1::PlansController < ApplicationController
             set_provider
             render(json: {plans: @provider.plans}, status: :ok)
         else
-            plans = Plans.all
+            plans = Plan.all
             render(json: {plans: plans}, status: :ok)
         end
     end
