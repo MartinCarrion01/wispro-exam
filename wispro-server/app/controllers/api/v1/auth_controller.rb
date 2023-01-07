@@ -1,7 +1,7 @@
 class Api::V1::AuthController < ApplicationController
     def login
         client = Client.find_by(username: params[:username])
-        if client&.authenticate(params[:password])
+        if client && client.authenticate(params[:password])
             token = jwt_encode(client_id: client.id)
             render(json: {token: token}, status: :ok)
         else

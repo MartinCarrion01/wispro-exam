@@ -1,8 +1,5 @@
-class Api::V1::PlansController < ApplicationController
-    include SetProvider
-    
-    before_action :set_provider, only: %i[create update destroy]
-    before_action :set_plan, only: %i[update destroy]
+class Api::V1::PlansController < ApplicationController    
+    before_action :set_provider, only: %i[create]
 
     def index
         if params[:id].present?
@@ -23,32 +20,15 @@ class Api::V1::PlansController < ApplicationController
         end
     end
 
-    def update
-        if @plan.update(plan_params)
-            render(json: {plan: @plan}, status: :ok)
-        else
-            render_errors_response(@plan)
-        end
-    end
-
-    def destroy
-        if @plan.destroy
-            render(status: :no_content)
-        else
-            render_errors_response(@plan)
-        end
-    end
-
     private
     def plan_params
         params.require(:plan).permit(:description)
     end
 
-    def set_plan
-        @plan = @provider.plans.where(id: params[:plan_id]).first
-        if @plan.nil?
-            render(json: {message: "El plan solicitado no existe"}, status: :not_found)
-            false
+    def set_provider
+        @provider = Provider.find_by(id: params[:id])
+        if @provider.nil?
+            render(json: {message: "El proveedor solicitado no existe"}, status: :not_found)
         end
     end
 end

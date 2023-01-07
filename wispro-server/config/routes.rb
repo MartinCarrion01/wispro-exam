@@ -12,6 +12,12 @@ Rails.application.routes.draw do
       end
       resources :plans, only: %i[index]
       resources :service_requests
+      resources :service_change_request do
+        member do
+          put :update_status
+          patch :update_status
+        end
+      end
       resources :clients, only: %i[create]
       resources :auth, only: [] do
         collection do
