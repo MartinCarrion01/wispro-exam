@@ -5,12 +5,13 @@ Rails.application.routes.draw do
   # root "articles#index"
   namespace :api do
     namespace :v1 do
-      resources :providers do
+      resources :providers, only: %i[create] do
         member do
-          resources :plans, param: :plan_id
+          get :get_token
         end
+        resources :plans, only: %i[index]
       end
-      resources :plans, only: %i[index] do
+      resources :plans, only: %i[index create] do
         resources :service_requests, only: %i[create]
       end
       resources :service_requests, only: %i[] do

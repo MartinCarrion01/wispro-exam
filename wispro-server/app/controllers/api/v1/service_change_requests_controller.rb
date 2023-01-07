@@ -1,18 +1,20 @@
 class Api::V1::ServiceChangeRequestsController < ApplicationController
     include ValidateStatusParams
-    include SetPlan
 
-    before_action :authenticate_request, only: %i[create]
-    before_action :set_plan, only: %i[create]
-    before_action :has_an_active_plan_with_given_provider?, only: %i[create]
-    before_action :validate_service_request, only: %i[create]
+    before_action :authenticate_client, only: %i[create]
+    before_action :set_client_plan, only: %i[create]
+    before_action :has_a_pending_change_request_to_given_provider, only: %i[create]
+    before_action :set_new_plan, only: %i[create]
+    before_action :does_new_plan_belong_to_same_provider?, only: %i[create]
+    before_action :authenticate_provider, only: %i[update_status]
     before_action :validate_status_params, only: %i[update_status]
+    before_action :set_service_change_request, only: %i[update_status]
+    before_action :can_update_service_change_request?, only: %i[update_status]
+    before_action :validate_service_change_request, only: %i[update_status]
     
     def create
-        service_change_request = ServiceChangeRequest.find_or_initialize_by(plan_id: @plan.id, service_request_id: @service_request.id, status: "pending")
-        if service_change_request.persisted?
-            render(json: {message: "Ya posee una solicitud de cambio de plan pendiente"}, status: :bad_request)
-        elsif service_change_request.save
+        service_change_request = ServiceChangeRequest.new(current_plan: @client_plan, new_plan: @new_plan)
+        if service_change_request.save
             render(json: {service_change_request: service_change_request}, status: :created)
         else
             render_errors_response(service_change_request)
@@ -20,41 +22,69 @@ class Api::V1::ServiceChangeRequestsController < ApplicationController
     end
 
     def update_status
-        response_message = ""
-        @service_change_request.status = params[:status]
-        if params[:status] == "approved"
-            @service_change_request.service_request.status = "inactive"
-            new_service_request = ServiceRequest.new(plan: @service_change_request.plan, client: @service_change_request.service_request.client)
-            if !new_service_request.valid?
-                render(json: {message: new_service_request.errors})
-            end
-        elsif params[:status] == "rejected"
-            response_message = "La solicitud de cambio de plan ha sido rechazada correctamente"
+        begin
+            @service_change_request.update_status(params[:status])
+            render(json: {service_change_request: @service_change_request}, status: :ok)
+        rescue ActiveRecord::Record_Invalid => invalid
+            render(json: {message: invalid.record.errors}, status: :bad_request)
         end
     end
 
     private
     def set_client_plan
-        @service_request = ServiceRequest.find_by(id: params[:service_request_id])
-        if @service_request.nil?
-            render(json: {message: "La solicitud de contrato requerida no existe"}, status: :not_found)
-        end
-    end
-
-    def validate_service_request
-        if @service_request.client.id != @current_client.id
-            render(json: {message: "La solicitud de contrato no le pertenece al cliente actual"}, status: :bad_request)
-            false
-        end
-        if @service_request.status != "approved"
-            render(json: {message: "La solicitud de contrato no es válida para realizar un cambio de plan"}, status: :bad_request)
+        @client_plan = ClientPlan.find_by(plan_id: params[:current_plan_id], client_id: @current_client.id, active: true)
+        if @client_plan.nil?
+            render(json: {message: "No posee una suscripcion activa al plan que desea cambiar"},
+                 status: :not_found)
             false
         end
     end
 
-    def has_an_active_plan_with_given_provider?
-        if !ClientPlan.has_an_active_plan_with_given_provider?(@current_client.id, @plan.provider_id)
-            render(json: {message: "Debe tener una suscripcion activa al proveedor del plan requerido para solicitar el cambio al mismo"},
+    def has_a_pending_change_request_to_given_provider?
+        if @current_client.has_a_pending_change_request_to_given_provider(@client_plan.plan.provider_id)?
+            render(json: {message: "Usted ya posee una solicitud de cambio pendiente de revision con el proveedor requerido"},
+                 status: :bad_request)
+            false
+        end
+    end
+
+    def set_new_plan
+        @new_plan = Plan.find_by(id: params[:new_plan_id])
+        if @new_plan.nil?
+            render(json: {message: "No existe el plan al cual desea cambiarse"},
+                 status: :not_found)
+            false
+        end
+    end
+
+    def does_new_plan_belong_to_same_provider?
+        if !@client_plan.plan.does_belong_to_the_same_provider_as?(@new_plan)
+            render(json: {message: "El plan al cual desea cambiarse no es del mismo proveedor de su plan actual"},
+                 status: :bad_request)
+            false
+        end
+    end
+
+    def set_service_change_request
+        @service_change_request = ServiceChangeRequest.find_by(id: params[:id])
+        if @service_change_request.nil? 
+            render(json: {message: "La solicitud de cambio de plan requerida no existe"},
+                 status: :not_found)
+            false
+        end
+    end
+
+    def can_update_service_change_request?
+        if !@current_provider.can_update_service_change_request?(@service_change_request)
+            render(json: {message: "No puede revisar una solicitud de cambio de un plan que no le pertence al proveedor actual"},
+                 status: :bad_request)
+            false
+        end
+    end
+
+    def validate_service_change_request
+        if @service_change_request.status != "pending"
+            render(json: {message: "La solicitud de cambio de plan no es válida para su revisión"},
                  status: :bad_request)
             false
         end

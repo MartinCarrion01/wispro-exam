@@ -1,9 +1,9 @@
 class Api::V1::PlansController < ApplicationController    
-    before_action :set_provider, only: %i[create]
+    before_action :set_provider, if: -> { params[:provider_id].present? }, only: %i[create]
+    before_action :authenticate_provider, only: %i[create]
 
     def index
-        if params[:id].present?
-            set_provider
+        if @provider.present?
             render(json: {plans: @provider.plans}, status: :ok)
         else
             plans = Plan.all
@@ -12,11 +12,11 @@ class Api::V1::PlansController < ApplicationController
     end
 
     def create
-        plan = @provider.plans.build(plan_params)
-        if @provider.save
+        plan = @current_provider.plans.build(plan_params)
+        if @current_provider.save
             render(json: {plan: plan}, status: :created)
         else
-            render_errors_response(@provider)
+            render_errors_response(@current_provider)
         end
     end
 
@@ -26,9 +26,10 @@ class Api::V1::PlansController < ApplicationController
     end
 
     def set_provider
-        @provider = Provider.find_by(id: params[:id])
+        @provider = Provider.find_by(id: params[:provider_id])
         if @provider.nil?
             render(json: {message: "El proveedor solicitado no existe"}, status: :not_found)
+            false
         end
     end
 end
