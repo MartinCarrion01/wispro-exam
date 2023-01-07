@@ -1,5 +1,5 @@
 class ServiceRequest < ApplicationRecord
-    enum :status, %i[pending approved rejected inactive]
+    enum :status, %i[pending approved rejected]
 
     belongs_to :client
     belongs_to :plan
@@ -9,5 +9,13 @@ class ServiceRequest < ApplicationRecord
             status: "rejected",
             created_at: (Time.now - 1.month)..)
         rejected_requests
+    end
+
+    def update_status(new_status)
+        self.status = new_status
+        if new_status == "approved"
+            ClientPlan.create(client: self.client, plan: self.plan)
+        end
+        self.save
     end
 end

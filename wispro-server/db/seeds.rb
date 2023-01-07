@@ -14,4 +14,6 @@ isp_1.plans.create(description: "50 mb simetrico")
 isp_1.plans.create(description: "30 mb asimetrico")
 isp_2.plans.create(description: "100 mb asimetrico")
 
-Client.create(username: "martin", password: "12345678", first_name: "Martin", last_name: "Carrion")
+client = Client.create(username: "martin", password: "12345678", first_name: "Martin", last_name: "Carrion")
+
+ClientPlan.create(client: client, plan: isp_1.plans.first)

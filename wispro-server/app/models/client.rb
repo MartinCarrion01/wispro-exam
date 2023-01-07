@@ -8,4 +8,6 @@ class Client < ApplicationRecord
 
     has_many :service_requests
     has_many :plans, through: :service_requests
+    has_many :client_plans
+    has_many :plans, through: :client_plans
 end

@@ -1,8 +1,10 @@
 class Api::V1::ServiceRequestsController < ApplicationController
     include SetPlan
+    include ValidateStatusParams
 
-    before_action :authenticate_request, only: %i[create rejected]
+    before_action :authenticate_request, only: %i[create rejected_last_month]
     before_action :set_plan, only: %i[create]
+    before_action :has_an_active_plan_with_given_provider?, only: %i[create]
     before_action :validate_status_params, only: %i[update_status]
     before_action :set_service_request, only: %i[update_status]
     before_action :validate_service_request, only: %i[update_status]
@@ -19,35 +21,41 @@ class Api::V1::ServiceRequestsController < ApplicationController
     end
 
     def update_status
-        @service_request.status = params[:status]
-        if @service_request.save
-            if params[:status] == "approved"
-                render(json: {message: "La solicitud de contrato ha sido aceptada correctamente"}, status: :ok)
-            elsif params[:status] == "rejected"
-                render(json: {message: "La solicitud de contrato ha sido rechazada correctamente"}, status: :ok)
-            end
-        else
-            render_errors_response(@service_request)
+        begin
+            @service_request.update_status(params[:status])
+            render(json: {service_request: @service_request}, status: :ok)
+        rescue ActiveRecord::Record_Invalid => invalid
+            render(json: {message: invalid.record.errors}, status: :bad_request)
         end
     end
 
-    def rejected
+    def rejected_last_month
         rejected_requests = ServiceRequest.rejected_last_month(@current_client.id)
         render(json: {service_requests: rejected_requests}, status: :ok)
     end
 
     private
+    def has_an_active_plan_with_given_provider?
+        if ClientPlan.has_an_active_plan_with_given_provider?(@current_client.id, @plan.provider_id)
+            render(json: {message: "Usted ya posee una suscripcion activa a un plan de este proveedor, si desea cambiar su plan, cree una solicitud de cambio de plan"},
+                 status: :bad_request)
+            false
+        end
+    end
+
     def set_service_request
         @service_request = ServiceRequest.find_by(id: params[:id])
         if @service_request.nil?
-            render(json: {message: "La solicitud de contrato requerida no existe"}, status: :not_found)
+            render(json: {message: "La solicitud de contrato requerida no existe"},
+                 status: :not_found)
             false
         end
     end
 
     def validate_service_request
         if @service_request.status != "pending"
-            render(json: {message: "La solicitud de contrato requerida no es valida para su aprobación/rechazo"}, status: :bad_request)
+            render(json: {message: "La solicitud de contrato requerida no es valida para su aprobación/rechazo"},
+                 status: :bad_request)
             false
         end
     end

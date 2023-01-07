@@ -4,7 +4,7 @@ class Api::V1::ServiceChangeRequestsController < ApplicationController
 
     before_action :authenticate_request, only: %i[create]
     before_action :set_plan, only: %i[create]
-    before_action :set_service_request, only: %i[create]
+    before_action :has_an_active_plan_with_given_provider?, only: %i[create]
     before_action :validate_service_request, only: %i[create]
     before_action :validate_status_params, only: %i[update_status]
     
@@ -34,7 +34,7 @@ class Api::V1::ServiceChangeRequestsController < ApplicationController
     end
 
     private
-    def set_service_request
+    def set_client_plan
         @service_request = ServiceRequest.find_by(id: params[:service_request_id])
         if @service_request.nil?
             render(json: {message: "La solicitud de contrato requerida no existe"}, status: :not_found)
@@ -48,6 +48,14 @@ class Api::V1::ServiceChangeRequestsController < ApplicationController
         end
         if @service_request.status != "approved"
             render(json: {message: "La solicitud de contrato no es válida para realizar un cambio de plan"}, status: :bad_request)
+            false
+        end
+    end
+
+    def has_an_active_plan_with_given_provider?
+        if !ClientPlan.has_an_active_plan_with_given_provider?(@current_client.id, @plan.provider_id)
+            render(json: {message: "Debe tener una suscripcion activa al proveedor del plan requerido para solicitar el cambio al mismo"},
+                 status: :bad_request)
             false
         end
     end

@@ -10,9 +10,19 @@ Rails.application.routes.draw do
           resources :plans, param: :plan_id
         end
       end
-      resources :plans, only: %i[index]
-      resources :service_requests
-      resources :service_change_request do
+      resources :plans, only: %i[index] do
+        resources :service_requests, only: %i[create]
+      end
+      resources :service_requests, only: %i[] do
+        member do
+          put :update_status
+          patch :update_status
+        end
+        collection do
+          get :rejected_last_month
+        end
+      end
+      resources :service_change_request, only: %i[create] do
         member do
           put :update_status
           patch :update_status
