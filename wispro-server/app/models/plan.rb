@@ -16,7 +16,7 @@ class Plan < ApplicationRecord
             end
             provider.plans
         else
-            Plans.all
+            Plan.all
         end
     end
 end

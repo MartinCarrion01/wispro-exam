@@ -15,7 +15,7 @@ class ServiceRequest < ApplicationRecord
         if client.has_an_active_plan_with_given_provider?(plan.provider_id)
             raise ActivePlanWithGivenProviderError
         end
-        ServiceRequest.create(plan: plan, client: client)
+        ServiceRequest.create!(plan: plan, client: client)
     end
 
     def self.update_status(service_request_id, new_status, provider)
@@ -26,16 +26,17 @@ class ServiceRequest < ApplicationRecord
         if service_request.nil?
             raise ActiveRecord::RecordNotFound.new("La solicitud de contrato requerida no existe")
         end
-        unless provider.can_update_service_request?(@service_request)
+        unless provider.can_update_service_request?(service_request)
             raise ProviderCantUpdateRequestError
         end
         if service_request.status != "pending"
             raise NotUpdatableRequestError
         end
         if new_status == "approved"
-            ClientPlan.create(client: self.client, plan: self.plan)
+            ClientPlan.create!(client: service_request.client, plan: service_request.plan)
         end
-        service_request.update(status: new_status)
+        service_request.update!(status: new_status)
+        service_request
     end
 
     class PendingRequestToGivenProviderError < StandardError
@@ -58,7 +59,7 @@ class ServiceRequest < ApplicationRecord
 
     class ProviderCantUpdateRequestError < StandardError
         def message
-            "No puede revisar una solicitud de contratación de un plan que no le pertence al proveedor actual"
+            "No puede revisar una solicitud de contratación de un plan que no le pertenece al proveedor actual"
         end
     end
 

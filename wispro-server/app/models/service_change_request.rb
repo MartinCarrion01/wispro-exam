@@ -1,7 +1,7 @@
 class ServiceChangeRequest < ApplicationRecord
     enum :status, %i[pending approved rejected]
 
-    belongs_to :current_plan, class_name: 'ClientPlan', foreign_key: :client_plan_id 
+    belongs_to :current_plan, class_name: 'ClientPlan', autosave: true, foreign_key: :client_plan_id 
     belongs_to :new_plan, class_name: 'Plan', foreign_key: :plan_id
 
     def self.create_service_change_request(current_plan_id, new_plan_id, client)
@@ -9,7 +9,7 @@ class ServiceChangeRequest < ApplicationRecord
         if client_plan.nil?
             raise ActiveRecord::RecordNotFound.new("No posee una suscripcion activa al plan que desea cambiar")
         end
-        if client.has_a_pending_change_request_to_given_provider(client_plan.plan.provider_id)?
+        if client.has_a_pending_change_request_to_given_provider?(client_plan.plan.provider_id)
             raise PendingChangeRequestToGivenProviderError
         end
         new_plan = Plan.find_by(id: new_plan_id)
@@ -19,7 +19,7 @@ class ServiceChangeRequest < ApplicationRecord
         unless client_plan.plan.does_belong_to_the_same_provider_as?(new_plan)
             raise NewPlanIsFromOtherProviderError
         end
-        ServiceChangeRequest.create(current_plan: client_plan, new_plan: new_plan, client: client)
+        ServiceChangeRequest.create!(current_plan: client_plan, new_plan: new_plan)
     end
 
     def self.update_status(service_change_request_id, new_status, provider)
@@ -37,11 +37,12 @@ class ServiceChangeRequest < ApplicationRecord
             raise NotUpdatableChangeRequestError
         end
         if new_status == "approved"
-            ClientPlan.create(client: service_change_request.current_plan.client, plan: service_change_request.new_plan)
+            ClientPlan.create!(client: service_change_request.current_plan.client, plan: service_change_request.new_plan)
             service_change_request.current_plan.active = false
         end
         service_change_request.status = new_status
-        service_change_request.save
+        service_change_request.save!
+        service_change_request
     end
 
     class PendingChangeRequestToGivenProviderError < StandardError

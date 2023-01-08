@@ -5,10 +5,10 @@ class Api::V1::ServiceRequestsController < ApplicationController
     def create
         begin
             service_request = ServiceRequest.create_service_request(params[:plan_id], @current_client)
-            render(json: {service_request: service_request},status: :ok)
+            render(json: {service_request: service_request},status: :created)
         rescue ActiveRecord::RecordNotFound => exception
             render(json: {message: exception.message}, status: :not_found)
-        rescue ActiveRecord::RecordInvalid=> exception
+        rescue ActiveRecord::RecordInvalid => exception
             render(json: {message: exception.record.errors}, status: :bad_request)
         rescue ServiceRequest::PendingRequestToGivenProviderError,
              ServiceRequest::ActivePlanWithGivenProviderError => exception
@@ -19,11 +19,11 @@ class Api::V1::ServiceRequestsController < ApplicationController
     def update_status
         begin
             service_request = ServiceRequest.update_status(params[:id], params[:status], @current_provider)
-            render(json: {service_request: @service_request}, status: :ok)
+            render(json: {service_request: service_request}, status: :ok)
         rescue ActiveRecord::RecordNotFound => exception
             render(json: {message: exception.message}, status: :not_found)
-        rescue ActiveRecord::Record_Invalid => invalid
-            render(json: {message: invalid.record.errors}, status: :bad_request)
+        rescue ActiveRecord::RecordInvalid => exception
+            render(json: {message: exception.record.errors}, status: :bad_request)
         rescue ServiceRequest::InvalidStatusParametersError,
              ServiceRequest::ProviderCantUpdateRequestError, 
              ServiceRequest::NotUpdatableRequestError => exception

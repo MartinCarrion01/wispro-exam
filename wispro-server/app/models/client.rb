@@ -12,11 +12,15 @@ class Client < ApplicationRecord
     has_many :plans, through: :client_plans
 
     def has_a_pending_request_to_given_provider?(provider_id)
-        Client.includes(:service_requests, :plans).where(service_requests: {client_id: self.id, status: "pending", plans:{provider_id: provider_id}}).exists?
+        Client.joins(service_requests: :plan)
+        .where(service_requests: {client_id: self.id, status: "pending"},
+             plan: {provider_id: provider_id}).exists?
     end
 
     def has_an_active_plan_with_given_provider?(provider_id)
-        Client.includes(:client_plans, :plans).where(client_plans: {active: true, client_id: self.id, plans: {provider_id: provider_id}}).exists?
+        Client.joins(client_plans: :plan)
+        .where(client_plans: {active: true, client_id: self.id},
+             plan: {provider_id: provider_id}).exists?
     end
 
     def has_a_pending_change_request_to_given_provider?(provider_id)

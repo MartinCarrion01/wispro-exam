@@ -23,7 +23,7 @@ Rails.application.routes.draw do
           get :rejected_last_month
         end
       end
-      resources :service_change_request, only: %i[create] do
+      resources :service_change_requests, only: %i[create] do
         member do
           put :update_status
           patch :update_status
