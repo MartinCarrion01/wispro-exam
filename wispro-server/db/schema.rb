@@ -14,16 +14,6 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_07_012058) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "client_plans", force: :cascade do |t|
-    t.boolean "active", default: true
-    t.bigint "client_id"
-    t.bigint "plan_id"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_client_plans_on_client_id"
-    t.index ["plan_id"], name: "index_client_plans_on_plan_id"
-  end
-
   create_table "clients", force: :cascade do |t|
     t.string "username"
     t.string "password_digest"
@@ -47,24 +37,34 @@ ActiveRecord::Schema[7.0].define(version: 2023_01_07_012058) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "service_change_requests", force: :cascade do |t|
+  create_table "subscription_change_requests", force: :cascade do |t|
     t.integer "status", default: 0
-    t.bigint "client_plan_id"
+    t.bigint "subscription_id"
     t.bigint "plan_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["client_plan_id"], name: "index_service_change_requests_on_client_plan_id"
-    t.index ["plan_id"], name: "index_service_change_requests_on_plan_id"
+    t.index ["plan_id"], name: "index_subscription_change_requests_on_plan_id"
+    t.index ["subscription_id"], name: "index_subscription_change_requests_on_subscription_id"
   end
 
-  create_table "service_requests", force: :cascade do |t|
+  create_table "subscription_requests", force: :cascade do |t|
     t.integer "status", default: 0
     t.bigint "client_id"
     t.bigint "plan_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["client_id"], name: "index_service_requests_on_client_id"
-    t.index ["plan_id"], name: "index_service_requests_on_plan_id"
+    t.index ["client_id"], name: "index_subscription_requests_on_client_id"
+    t.index ["plan_id"], name: "index_subscription_requests_on_plan_id"
+  end
+
+  create_table "subscriptions", force: :cascade do |t|
+    t.boolean "active", default: true
+    t.bigint "client_id"
+    t.bigint "plan_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["client_id"], name: "index_subscriptions_on_client_id"
+    t.index ["plan_id"], name: "index_subscriptions_on_plan_id"
   end
 
 end

@@ -1,6 +1,6 @@
-class CreateClientPlans < ActiveRecord::Migration[7.0]
+class CreateSubscriptions < ActiveRecord::Migration[7.0]
   def change
-    create_table :client_plans do |t|
+    create_table :subscriptions do |t|
       t.boolean :active, default: true
       t.references :client
       t.references :plan

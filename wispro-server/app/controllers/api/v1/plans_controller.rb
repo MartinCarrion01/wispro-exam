@@ -3,8 +3,13 @@ class Api::V1::PlansController < ApplicationController
 
     def index
         begin
-            plans = Plan.index(params[:provider_id])
-            render(json: {plans: plans}, status: :ok)
+            if params[:provider_id].present?
+                plans = Plan.list_by_provider(params[:provider_id])
+                render(json: {plans: plans}, status: :ok)
+            else
+                plans = Plan.all
+                render(json: {plans: plans}, status: :ok)
+            end
         rescue ActiveRecord::RecordNotFound => exception
             render(json: {message: exception.message}, status: :not_found)
         end

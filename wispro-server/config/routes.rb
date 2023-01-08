@@ -12,9 +12,9 @@ Rails.application.routes.draw do
         resources :plans, only: %i[index]
       end
       resources :plans, only: %i[index create] do
-        resources :service_requests, only: %i[create]
+        resources :subscription_requests, only: %i[create]
       end
-      resources :service_requests, only: %i[] do
+      resources :subscription_requests, only: %i[] do
         member do
           put :update_status
           patch :update_status
@@ -23,7 +23,7 @@ Rails.application.routes.draw do
           get :rejected_last_month
         end
       end
-      resources :service_change_requests, only: %i[create] do
+      resources :subscription_change_requests, only: %i[create] do
         member do
           put :update_status
           patch :update_status

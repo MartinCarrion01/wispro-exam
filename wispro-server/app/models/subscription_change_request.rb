@@ -1,48 +1,48 @@
-class ServiceChangeRequest < ApplicationRecord
+class SubscriptionChangeRequest < ApplicationRecord
     enum :status, %i[pending approved rejected]
 
-    belongs_to :current_plan, class_name: 'ClientPlan', autosave: true, foreign_key: :client_plan_id 
+    belongs_to :current_subscription, class_name: 'Subscription', autosave: true, foreign_key: :subscription_id 
     belongs_to :new_plan, class_name: 'Plan', foreign_key: :plan_id
 
-    def self.create_service_change_request(current_plan_id, new_plan_id, client)
-        client_plan = ClientPlan.find_by(plan_id: current_plan_id, client_id: client.id, active: true)
-        if client_plan.nil?
+    def self.create_subscription_change_request(current_subscription_id, new_plan_id, client)
+        subscription = Subscription.find_by(plan_id: current_subscription_id, client_id: client.id, active: true)
+        if subscription.nil?
             raise ActiveRecord::RecordNotFound.new("No posee una suscripcion activa al plan que desea cambiar")
         end
-        if client.has_a_pending_change_request_to_given_provider?(client_plan.plan.provider_id)
+        if client.has_a_pending_change_request_to_given_provider?(subscription.plan.provider_id)
             raise PendingChangeRequestToGivenProviderError
         end
         new_plan = Plan.find_by(id: new_plan_id)
         if new_plan.nil?
             raise ActiveRecord::RecordNotFound.new("No existe el plan al cual desea cambiarse")
         end
-        unless client_plan.plan.does_belong_to_the_same_provider_as?(new_plan)
+        unless subscription.plan.does_belong_to_the_same_provider_as?(new_plan)
             raise NewPlanIsFromOtherProviderError
         end
-        ServiceChangeRequest.create!(current_plan: client_plan, new_plan: new_plan)
+        SubscriptionChangeRequest.create!(current_subscription: subscription, new_plan: new_plan)
     end
 
-    def self.update_status(service_change_request_id, new_status, provider)
+    def self.update_status(subscription_change_request_id, new_status, provider)
         if new_status != "approved" && new_status != "rejected"
             raise InvalidStatusParametersError
         end
-        service_change_request = ServiceChangeRequest.find_by(id: service_change_request_id)
-        if service_change_request.nil? 
+        subscription_change_request = SubscriptionChangeRequest.find_by(id: subscription_change_request_id)
+        if subscription_change_request.nil? 
             raise ActiveRecord::RecordNotFound.new("La solicitud de cambio de plan requerida no existe")
         end
-        unless provider.can_update_service_change_request?(service_change_request)
+        unless provider.can_update_subscription_change_request?(subscription_change_request)
             raise ProviderCantUpdateChangeRequestError
         end
-        if service_change_request.status != "pending"
+        if subscription_change_request.status != "pending"
             raise NotUpdatableChangeRequestError
         end
         if new_status == "approved"
-            ClientPlan.create!(client: service_change_request.current_plan.client, plan: service_change_request.new_plan)
-            service_change_request.current_plan.active = false
+            Subscription.create!(client: subscription_change_request.current_subscription.client, plan: subscription_change_request.new_plan)
+            subscription_change_request.current_subscription.active = false
         end
-        service_change_request.status = new_status
-        service_change_request.save!
-        service_change_request
+        subscription_change_request.status = new_status
+        subscription_change_request.save!
+        subscription_change_request
     end
 
     class PendingChangeRequestToGivenProviderError < StandardError
@@ -65,13 +65,13 @@ class ServiceChangeRequest < ApplicationRecord
     
     class ProviderCantUpdateChangeRequestError < StandardError
         def message
-            "No puede revisar una solicitud de cambio de un plan que no le pertence al proveedor actual"
+            "No puede revisar una solicitud de cambio de un plan que no le pertenece"
         end
     end
 
     class NotUpdatableChangeRequestError < StandardError
         def message
-            "La solicitud de cambio de plan no es válida para su revisión"
+            "La solicitud de cambio de plan requerida ya ha sido revisada"
         end
     end
 end
