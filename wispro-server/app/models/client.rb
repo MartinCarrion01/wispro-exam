@@ -24,10 +24,8 @@ class Client < ApplicationRecord
     end
 
     def rejected_requests_last_month
-        rejected_requests = ServiceRequest.where(client_id: self.id,
+        ServiceRequest.where(client_id: self.id,
             status: "rejected",
             created_at: (Time.now - 1.month)..)
-        rejected_requests
     end
-
 end

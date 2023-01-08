@@ -6,10 +6,10 @@ class ApplicationController < ActionController::API
         begin
             decoded = jwt_decode(token)
             @current_client = Client.find(decoded[:client_id])
-        rescue ActiveRecord::RecordNotFound => e
-            render json: { errors: e.message }, status: :unauthorized
-        rescue JWT::DecodeError => e
-            render json: { errors: e.message }, status: :unauthorized
+        rescue ActiveRecord::RecordNotFound => exception
+            render json: { errors: exception.message }, status: :unauthorized
+        rescue JWT::DecodeError => exception
+            render json: { errors: exception.message }, status: :unauthorized
         end
     end
 
@@ -18,15 +18,11 @@ class ApplicationController < ActionController::API
         begin
             decoded = jwt_decode(token)
             @current_provider = Provider.find(decoded[:provider_id])
-        rescue ActiveRecord::RecordNotFound => e
-            render json: { errors: e.message }, status: :unauthorized
-        rescue JWT::DecodeError => e
-            render json: { errors: e.message }, status: :unauthorized
+        rescue ActiveRecord::RecordNotFound => exception
+            render json: { errors: exception.message }, status: :unauthorized
+        rescue JWT::DecodeError => exception
+            render json: { errors: exception.message }, status: :unauthorized
         end
-    end
-
-    def render_errors_response(object)
-        render(json: {message: object.errors}, status: :bad_request)
     end
 
     private

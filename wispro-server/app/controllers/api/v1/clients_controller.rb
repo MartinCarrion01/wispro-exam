@@ -4,7 +4,7 @@ class Api::V1::ClientsController < ApplicationController
         if client.save
             render(json: {client: client}, status: :ok)
         else
-            render_errors_response(client)
+            render(json: {client: client.errors}, status: :bad_request)
         end 
     end
 
