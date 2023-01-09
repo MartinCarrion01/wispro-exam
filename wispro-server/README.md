@@ -79,7 +79,789 @@ bin/rails server
 
 Para poder realizar peticiones al servidor, podemos usar por ejemplo: Postman o cURL. En este documento, se usará cURL en los ejemplos para cada endpoint
 
-# Casos de uso de la aplicación: 
+# Descripción general de la aplicación: 
+
+## Casos de uso principales de la aplicación: 
+
+<img src="/wispro-server/Diagrama de casos de uso - Wispro Exam.png" alt="Diagrama de CU">
+
+## Diagrama de clases del dominio del problema: 
+
+<img src="/wispro-server/Diagrama de clases - Wispro Exam.png" alt="Diagrama de clases">
+
+## Descripcion de cada clase del dominio: 
+
+### Provider
+
+Representa un proveedor de servicios de internet, este posee muchos planes. 
+
+### Plan
+
+Representa un plan ofrecido por el proveedor de servicios de internet con su correspondiente descripción (por ej: "50 mb asimétrico")
+
+### Client
+
+Representa un cliente que contrata uno de los planes que ofrece un proveedor específico. Esta representación del cliente esta compuesta por un nombre de usuario (username), la contraseña encriptada (password_digest) y su nombre completo (first_name y last_name)
+
+### Subscription
+
+Representa la suscripción a un plan específico de parte del cliente del proveedor. Cabe recalcar que un cliente puede suscribirse a muchos planes, pero este no puede suscribirse a otro plan de un mismo proveedor, en otras palabras, puede estar suscrito a muchos planes pero cada uno con distinto proveedor necesariamente.
+
+### SubscriptionRequest
+
+Representa una solicitud de contratación de un plan. El cliente la crea para, valga la redundancia, poder contratar un plan ofrecido por algún ISP. El proveedor dueño del plan al que el cliente solicita contratar, decide si aceptar o rechazar esta solicitud. Si la acepta, crea una subscripcion activa entre el cliente y el plan solicitado. 
+El cliente no puede solicitar una contratación de un plan a un proveedor si este ya se encuentra suscrito activamente a otro plan del mismo proveedor o si tambien tiene una solicitud al mismo proveedor que todavía no ha sido ni aprobada o rechazada.
+El proveedor tampoco puede aprobar o rechazar solicitudes de contratación de plan que no le pertenezcan.
+
+### SubscriptionChangeRequest
+
+Representa una solicitud de cambio de plan. El cliente la crea para poder cambiar el plan al que esta suscrito actualmente a otro plan ofrecido por el mismo proveedor. El proveedor dueño de ambos planes, al que esta suscrito actualmente al cliente y al que desea cambiar, decide si aceptar o rechazar esta solicitud. Si la acepta, crea una nueva suscripción activa entre el cliente y el plan al que quería cambiar el cliente y deja inactiva la suscripción previa que tenía. 
+El cliente no puede solicitar una contratación de cambio de plan si no cuenta con una suscripción activa a cualquier plan del proveedor. Tampoco si ya tiene otra solicitud de cambio de plan pendiente de revisión o si el plan al que quiere cambiarse no pertenece al proveedor de su plan actual.
+El proveedor tampoco puede aprobar o rechazar solicitudes de cambio de plan que no le pertenezcan.
+
+<a name="indice"></a>
+# Índice de rutas
+
+- [Proveedor](#proveedor)
+	- [Registrar proveedor](#registrar-proveedor)
+  - [Obtener token de autorización](#token-proveedor)
+- [Plan](#plan-link)
+	- [Registrar plan](#registrar-plan)
+	- [Listar planes](#listar-planes)
+  - [Listar planes por proveedor](#listar-planes-proveedor)
+- [Cliente](#cliente)
+	- [Registrar cliente](#registrar-cliente)
+	- [Login](#login)
+- [Solicitud de contratacion](#solicitud-contratacion)
+	- [Crear solicitud de contratacion](#crear-solicitud-contratacion)
+	- [Listar solicitudes de contratacion rechazadas en el ultimo mes a un cliente](#listar-solicitud-rechazada)
+  - [Actualizar estado de solicitud de contratación](#actualizar-estado-solicitud)
+- [Solicitud de cambio de plan](#solicitud-cambio)
+	- [Crear solicitud de cambio de plan](#crear-solicitud-cambio)
+  - [Actualizar estado de solicitud de cambio de plan](#actualizar-estado-cambio)
+
+# <a name='proveedor'></a> Proveedor
+
+## <a name='registrar-proveedor'></a> Registrar proveedor
+[Volver al índice](#indice)
+
+<p>Registra un proveedor con su nombre</p>
+
+### Ruta
+```
+POST /api/v1/providers
+```
+### Body params
+
+<table>
+  <tr>
+    <th>Parametro</th>
+    <th>Descripción</th>
+  </tr>
+  <tr>
+    <td>provider</td>
+    <td>Objeto JSON que representa el proveedor</td>
+  </tr>
+  <tr>
+    <td>provider.name</td>
+    <td>Nombre del proveedor</td>
+  </tr>
+</table>
+
+### Ejemplo
+
+```
+curl -X POST 'http://127.0.0.1:3000/api/v1/providers' \
+-H 'Content-Type: application/json' \
+--data-raw '{
+    "provider": {
+        "name": "ISP-EXAMPLE"
+    }
+}'
+```
+
+### Respuesta exitosa
+
+```
+201 CREATED
+{
+    "provider": {
+        "id": 4,
+        "name": "ISP-EXAMPLE",
+        "created_at": "2023-01-09T00:21:40.485Z",
+        "updated_at": "2023-01-09T00:21:40.485Z"
+    }
+}
+```
+
+### Respuesta con error
+
+```
+400 BAD_REQUEST
+{
+  "message": {
+    "{Nombre de la propiedad}": [
+      {
+        "error": "{Motivo de error"},
+        "{Info adicional del error}",
+        ...
+      },
+      ...
+      ],
+      ...
+  }
+}
+```
+
+## <a name='token-proveedor'></a> Obtener token de autorización
+[Volver al índice](#indice)
+
+<p>Obtiene el token de autorización para un proveedor especifico, ciertas operaciones necesitan este token para poder ser completadas</p>
+
+### Ruta
+```
+GET /api/v1/providers/:id/get_token
+```
+### Query params
+
+<table>
+  <tr>
+    <th>Parametro</th>
+    <th>Descripción</th>
+  </tr>
+  <tr>
+    <td>id</td>
+    <td>Representa el id del proveedor al que queremos recuperar su token de autorización</td>
+  </tr>
+</table>
+
+### Ejemplo
+
+```
+curl -X GET 'http://127.0.0.1:3000/api/v1/providers/2/get_token'
+```
+
+### Respuesta exitosa
+
+```
+200 OK
+{
+    "token": "eyJhbGciOiJIUzI1NiJ9.eyJwcm92aWRlcl9pZCI6MiwiZXhwIjoxNjczODI4OTE4fQ.Y6cdn_CKD9n-LKBqpXHy74Q97aeCDVdl5aMeYRUAdwA"
+}
+```
+
+### Respuesta con error
+
+```
+404 NOT_FOUND
+{
+    "message": "El proveedor solicitado no existe"
+}
+```
+# <a name='plan-link'></a> Plan
+
+## <a name='registrar-plan'></a> Registrar plan
+[Volver al índice](#indice)
+
+<p>Un proveedor registra uno de sus planes con su descripción correspondiente. Se necesita tener un token de autorización en el encabezado de la petición para llevar a cabo esta operación</p>
+
+### Ruta
+```
+POST /api/v1/plans
+```
+
+### Body params
+
+<table>
+  <tr>
+    <th>Parametro</th>
+    <th>Descripción</th>
+  </tr>
+  <tr>
+    <td>plan</td>
+    <td>Objeto JSON que representa el plan</td>
+  </tr>
+  <tr>
+    <td>plan.description</td>
+    <td>Descripción del plan a crear</td>
+  </tr>
+</table>
+
+### Ejemplo
+
+```
+curl -X POST 'http://127.0.0.1:3000/api/v1/plans' \
+-H 'Authorization: eyJhbGciOiJIUzI1NiJ9.eyJwcm92aWRlcl9pZCI6MywiZXhwIjoxNjczNzQ2OTkyfQ.rqnJD8uBVQzvDqlMYpbxPeMW9K36NjhqXZ0V5FnGdZc' \
+-H 'Content-Type: application/json' \
+--data-raw '{
+    "plan": {
+        "description": "40mb asimetrico"
+    }
+}'
+```
+
+### Respuesta exitosa
+
+```
+201 CREATED
+{
+    "plan": {
+        "id": 4,
+        "description": "40mb asimetrico",
+        "provider_id": 3,
+        "created_at": "2023-01-09T00:35:06.691Z",
+        "updated_at": "2023-01-09T00:35:06.691Z"
+    }
+}
+```
+
+### Respuesta con error
+
+```
+401 UNAUTHORIZED
+{
+    "errors": "Nil JSON web token"
+}
+```
+
+```
+400 BAD_REQUEST
+{
+  "message": {
+    "{Nombre de la propiedad}": [
+      {
+        "error": "{Motivo de error"},
+        "{Info adicional del error}",
+        ...
+      },
+      ...
+      ],
+      ...
+  }
+}
+```
+
+## <a name='listar-planes'></a> Listar planes
+[Volver al índice](#indice)
+
+<p>Se listan todos los planes que existen</p>
+
+### Ruta
+```
+GET /api/v1/plans
+```
+
+### Ejemplo
+
+```
+curl -X GET 'http://127.0.0.1:3000/api/v1/plans'
+```
+
+### Respuesta exitosa
+
+```
+200 OK
+{
+    "plans": [
+        {
+            "id": 1,
+            "description": "50 mb simetrico",
+            "provider_id": 1,
+            "created_at": "2023-01-09T00:18:54.181Z",
+            "updated_at": "2023-01-09T00:18:54.181Z"
+        },
+        {
+            "id": 2,
+            "description": "30 mb asimetrico",
+            "provider_id": 1,
+            "created_at": "2023-01-09T00:18:54.230Z",
+            "updated_at": "2023-01-09T00:18:54.230Z"
+        },
+        {
+            "id": 3,
+            "description": "100 mb asimetrico",
+            "provider_id": 2,
+            "created_at": "2023-01-09T00:18:54.264Z",
+            "updated_at": "2023-01-09T00:18:54.264Z"
+        },
+        {
+            "id": 4,
+            "description": "40mb asimetrico",
+            "provider_id": 3,
+            "created_at": "2023-01-09T00:35:06.691Z",
+            "updated_at": "2023-01-09T00:35:06.691Z"
+        }
+    ]
+}
+```
+## <a name='listar-planes-proveedor'></a> Listar planes por proveedor
+[Volver al índice](#indice)
+
+<p>Se listan todos los planes que posee cierto proveedor</p>
+
+### Ruta
+```
+GET /api/v1/providers/:id/plans
+```
+### Query params
+
+<table>
+  <tr>
+    <th>Parametro</th>
+    <th>Descripción</th>
+  </tr>
+  <tr>
+    <td>id</td>
+    <td>Representa el id del proveedor al que le queremos consultar sus planes</td>
+  </tr>
+</table>
+
+### Ejemplo
+
+```
+curl -X GET 'http://127.0.0.1:3000/api/v1/providers/1/plans'
+```
+
+### Respuesta exitosa
+
+```
+200 OK
+{
+    "plans": [
+        {
+            "id": 1,
+            "description": "50 mb simetrico",
+            "provider_id": 1,
+            "created_at": "2023-01-09T00:18:54.181Z",
+            "updated_at": "2023-01-09T00:18:54.181Z"
+        },
+        {
+            "id": 2,
+            "description": "30 mb asimetrico",
+            "provider_id": 1,
+            "created_at": "2023-01-09T00:18:54.230Z",
+            "updated_at": "2023-01-09T00:18:54.230Z"
+        }
+    ]
+}
+```
+
+### Respuesta con error
+
+```
+404 NOT_FOUND
+{
+    "message": "El proveedor solicitado no existe"
+}
+```
+
+# <a name='cliente'></a> Cliente
+
+## <a name='registrar-cliente'></a> Registrar cliente
+[Volver al índice](#indice)
+
+<p>Un cliente se registra con su nombre de usuario, contraseña, confirmación de contraseña y nombre completo</p>
+
+### Ruta
+```
+POST /api/v1/clients
+```
+
+### Body params
+
+<table>
+  <tr>
+    <th>Parametro</th>
+    <th>Descripción</th>
+  </tr>
+  <tr>
+    <td>client</td>
+    <td>Objeto JSON que representa el cliente</td>
+  </tr>
+  <tr>
+    <td>client.username</td>
+    <td>Nombre de usuario del cliente que luego usara para logearse</td>
+  </tr>
+	  <tr>
+    <td>client.password</td>
+    <td>Contraseña del cliente que luego usara para logearse, tiene que tener una longitud mayor a 8 caracteres</td>
+  </tr>
+  	  <tr>
+    <td>client.password_confirmation</td>
+    <td>Confirmación de la contraseña elegida por el cliente</td>
+  </tr>
+  </tr>
+  	  <tr>
+    <td>client.first_name</td>
+    <td>Primer nombre del cliente</td>
+  </tr>
+  	  <tr>
+    <td>client.last_name</td>
+    <td>Apellido del cliente</td>
+  </tr>
+</table>
+
+### Ejemplo
+
+```
+curl -X POST 'http://127.0.0.1:3000/api/v1/clients' \
+-H 'Content-Type: application/json' \
+--data-raw '{
+    "client": {
+        "username": "martinc",
+        "password": "12345678",
+        "password_confirmation": "12345678",
+        "first_name": "Martín",
+        "last_name": "Carrion"
+    }
+}'
+```
+
+### Respuesta exitosa
+
+```
+201 CREATED
+{
+    "client": {
+        "username": "martinc",
+        "password": "12345678",
+        "password_confirmation": "12345678",
+        "first_name": "Martín",
+        "last_name": "Carrion"
+    }
+}
+```
+
+### Respuesta con error
+
+```
+400 BAD_REQUEST
+{
+  "message": {
+    "{Nombre de la propiedad}": [
+      {
+        "error": "{Motivo de error"},
+        "{Info adicional del error}",
+        ...
+      },
+      ...
+      ],
+      ...
+  }
+}
+```
+
+```
+400 BAD_REQUEST
+{
+    "message": {
+        "password_confirmation": [
+            "doesn't match Password"
+        ]
+    }
+}
+```
+
+## <a name='login'></a> Login de cliente
+[Volver al índice](#indice)
+
+<p>Un cliente recupera un token de autorización mediante su usuario y contraseña</p>
+
+### Ruta
+```
+POST /api/v1/auth/login
+```
+
+### Body params
+
+<table>
+  <tr>
+    <th>Parametro</th>
+    <th>Descripción</th>
+  </tr>
+  <tr>
+    <td>username</td>
+    <td>Nombre de usuario del cliente</td>
+  </tr>
+  <tr>
+    <td>password</td>
+    <td>Contraseña del cliente</td>
+  </tr>
+</table>
+
+### Ejemplo
+
+```
+curl -X POST 'http://127.0.0.1:3000/api/v1/auth/login' \
+-H 'Content-Type: application/json' \
+--data-raw '{
+    "username": "martin",
+    "password": "12345678"
+}'
+```
+
+### Respuesta exitosa
+
+```
+200 OK
+{
+    "token": "eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOjEsImV4cCI6MTY3MzgzMDU1OH0.cvJ6h_LlE84TFF_DB8Tndckic8WlKTJ0J-cYs9vr70M"
+}
+```
+
+### Respuesta con error
+
+```
+401 UNAUTHORIZED
+{
+    "message": "Contraseña incorrecta"
+}
+```
+
+```
+401 UNAUTHORIZED
+{
+    "message": "El cliente ingresado no existe"
+}
+```
+
+# <a name='solicitud-contratacion'></a> Solicitud de contratación
+
+## <a name='crear-solicitud-contratacion'></a> Crear solicitud de contratación
+[Volver al índice](#indice)
+
+<p>Un cliente crea un solicitud de contratación a un plan especifico. Es imporante destacar que el cliente no puede crear una solicitud de contratación si ya tiene una solicitud pendiente de revisión por parte del mismo proveedor. Tampoco puede crear una solicitud si ya esta suscrito a un plan del mismo proveedor actualmente. Para poder completar esta operación, el cliente necesita un token de autorización.</p>
+
+### Ruta
+```
+POST /api/v1/plans/:plan_id/subscription_requests
+```
+
+### Query params
+
+<table>
+  <tr>
+    <th>Parametro</th>
+    <th>Descripción</th>
+  </tr>
+  <tr>
+    <td>plan_id</td>
+    <td>Representa el id del plan al cual el cliente quiere suscribirse</td>
+  </tr>
+</table>
+
+### Ejemplo
+
+```
+curl -X POST 'http://127.0.0.1:3000/api/v1/plans/1/subscription_requests' \
+-H 'Authorization: eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOjIsImV4cCI6MTY3MzgzMTQyMH0.2WBjjJR1WUYubqIvFxSpn875HcsHbD8vUXy5arIPLGw'
+```
+
+### Respuesta exitosa
+
+```
+201 CREATED
+{
+    "subscription_request": {
+        "id": 1,
+        "status": "pending",
+        "client_id": 2,
+        "plan_id": 1,
+        "created_at": "2023-01-09T01:10:57.027Z",
+        "updated_at": "2023-01-09T01:10:57.027Z"
+    }
+}
+```
+
+### Respuesta con error
+
+```
+401 UNAUTHORIZED
+{
+    "errors": "Nil JSON web token"
+}
+```
+
+```
+404 NOT_FOUND
+{
+    "message": "El plan solicitado no existe"
+}
+```
+
+```
+400 BAD_REQUEST
+{
+    "message": "Usted ya posee otra solicitud de contratación pendiente de revision con este proveedor"
+}
+```
+
+```
+400 BAD_REQUEST
+{
+    "message": "Usted ya posee una suscripcion activa a un plan de este proveedor, si desea cambiar su plan, cree una solicitud de cambio de plan"
+}
+```
+
+```
+400 BAD_REQUEST
+{
+  "message": {
+    "{Nombre de la propiedad}": [
+      {
+        "error": "{Motivo de error"},
+        "{Info adicional del error}",
+        ...
+      },
+      ...
+      ],
+      ...
+  }
+}
+```
+
+## <a name='listar-solicitud-rechazada'></a> Listar solicitudes de contratación rechazadas en el ultimo mes al cliente actual
+[Volver al índice](#indice)
+
+<p>Se listan todas las solicitudes de contratación rechazadas en el ultimo mes al cliente actual. Para listarlas, se necesita un token de autorización del cliente</p>
+
+### Ruta
+```
+GET /api/v1/subscription_requests/rejected_last_month
+```
+### Ejemplo
+
+```
+curl -X GET 'http://127.0.0.1:3000/api/v1/subscription_requests/rejected_last_month' \
+-H 'Authorization: eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOjQsImV4cCI6MTY3MzgzMjM2Nn0.5FF8-IcHyabPINqaNwQrBjdQOk2rWJG9IUnHEVxNYn4'
+```
+
+### Respuesta exitosa
+
+```
+200 OK
+{
+    "subscription_requests": [
+        {
+            "id": 4,
+            "status": "rejected",
+            "client_id": 4,
+            "plan_id": 10,
+            "created_at": "2023-01-09T01:24:51.873Z",
+            "updated_at": "2023-01-09T01:24:51.873Z"
+        },
+        {
+            "id": 5,
+            "status": "rejected",
+            "client_id": 4,
+            "plan_id": 10,
+            "created_at": "2023-01-09T01:24:51.911Z",
+            "updated_at": "2023-01-09T01:24:51.911Z"
+        }
+    ]
+}
+```
+
+### Respuesta con error
+
+```
+401 UNAUTHORIZED
+{
+    "errors": "Nil JSON web token"
+}
+```
+
+## <a name='actualizar-estado-solicitud'></a> Actualizar estado de una solicitud de contratación
+[Volver al índice](#indice)
+
+<p>El proveedor actualiza el estado de la solicitud de contratación de un cliente, pudiendola aprobar o rechazar. En caso que la apruebe, se crea una suscripción activa entre el cliente y el plan que contrató. El proveedor no puede revisar solicitudes de contratación de planes que no le pertenecen ni tampoco revisar solicitudes que ya fueron revisadas. El proveedor necesita un token de autorización para completar la operación</p>
+
+### Ruta
+```
+PUT api/v1/subscription_requests/:id/update_status
+PATCH api/v1/subscription_requests/:id/update_status
+```
+
+### Query params
+
+<table>
+  <tr>
+    <th>Parametro</th>
+    <th>Descripción</th>
+  </tr>
+  <tr>
+    <td>subscription_request_id</td>
+    <td>Representa el id de la solicitud que se va a revisar</td>
+  </tr>
+</table>
 
 
-# Índice de endpoints
+### Body params
+
+<table>
+  <tr>
+    <th>Parametro</th>
+    <th>Descripción</th>
+  </tr>
+  <tr>
+    <td>status</td>
+    <td>Representa el estado final que se va a dar a la solicitud de contratación, solo puede ser igual a "approved" o "rejected"</td>
+  </tr>
+</table>
+
+### Ejemplo
+
+```
+curl -X PUT 'http://127.0.0.1:3000/api/v1/subscription_requests/9/update_status' \
+-H 'Authorization: eyJhbGciOiJIUzI1NiJ9.eyJwcm92aWRlcl9pZCI6MTEsImV4cCI6MTY3MzgzMzI4Mn0.hCFIIWcxTjLxvN5uDKYC48ETnJnhRxVotcNNUylPocY' \
+-H 'Content-Type: application/json' \
+--data-raw '{
+    "status": "approved"
+}'
+```
+
+### Respuesta exitosa
+
+```
+200 OK
+{
+    "subscription_request": {
+        "status": "approved",
+        "id": 9,
+        "client_id": 5,
+        "plan_id": 14,
+        "created_at": "2023-01-09T01:39:39.636Z",
+        "updated_at": "2023-01-09T01:41:46.722Z"
+    }
+}
+```
+
+### Respuesta con error
+
+```
+401 UNAUTHORIZED
+{
+    "errors": "Nil JSON web token"
+}
+```
+
+```
+400 BAD_REQUEST
+{
+    "message": "Solo se puede cambiar la solicitud a los estados 'approved' y 'rejected'"
+}
+```
+
+```
+404 NOT_FOUND
+{
+    "message": "La solicitud de contrato requerida no existe"
+}
+```
+
+```
+400 BAD_REQUEST
+{
+    "message": "Solo se puede cambiar la solicitud a los estados 'approved' y 'rejected'"
+}
+```
