@@ -5,7 +5,7 @@ class SubscriptionChangeRequest < ApplicationRecord
     belongs_to :new_plan, class_name: 'Plan', foreign_key: :plan_id
 
     def self.create_subscription_change_request(current_subscription_id, new_plan_id, client)
-        subscription = Subscription.find_by(plan_id: current_subscription_id, client_id: client.id, active: true)
+        subscription = Subscription.find_by(id: current_subscription_id, client_id: client.id, active: true)
         if subscription.nil?
             raise ActiveRecord::RecordNotFound.new("No posee una suscripcion activa al plan que desea cambiar")
         end
