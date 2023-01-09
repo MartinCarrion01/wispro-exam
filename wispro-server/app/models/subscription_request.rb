@@ -4,41 +4,57 @@ class SubscriptionRequest < ApplicationRecord
     belongs_to :client
     belongs_to :plan
 
-    def self.create_subscription_request(plan_id, client)
+    #Crea una solicitud de contratación de un plan teniendo en cuenta
+    #el numero de plan y el cliente que esta realizando la solicitud.
+    #Levanta excepciones donde alguna de las validaciones fallen
+    def self.create_subscription_request(plan_id, client)  
         plan = Plan.find_by(id: plan_id)
         if plan.nil?
             raise ActiveRecord::RecordNotFound.new("El plan solicitado no existe")
         end
+
         if client.has_a_pending_request_to_given_provider?(plan.provider_id)
             raise PendingRequestToGivenProviderError
         end
+
         if client.has_an_active_plan_with_given_provider?(plan.provider_id)
             raise ActivePlanWithGivenProviderError
         end
+
         SubscriptionRequest.create!(plan: plan, client: client)
     end
 
+    #Actualiza una solicitud de contratacion de un plan dada
+    #teniendo en cuenta su numero de id, el estado al que se lo quiere cambiar
+    #y el proveedor que intenta realizar la actualización
+    #Levanta excepciones donde alguna de las validaciones fallen
     def self.update_status(subscription_request_id, new_status, provider)
         if new_status != "approved" && new_status != "rejected"
             raise InvalidStatusParametersError
         end
+        
         subscription_request = SubscriptionRequest.find_by(id: subscription_request_id)
         if subscription_request.nil?
             raise ActiveRecord::RecordNotFound.new("La solicitud de contrato requerida no existe")
         end
+        
         unless provider.can_update_subscription_request?(subscription_request)
             raise ProviderCantUpdateRequestError
         end
+        
         if subscription_request.status != "pending"
             raise NotUpdatableRequestError
         end
+        
         if new_status == "approved"
             Subscription.create!(client: subscription_request.client, plan: subscription_request.plan)
         end
+        
         subscription_request.update!(status: new_status)
         subscription_request
     end
 
+    # Definicion de errores de validacion a la hora de crear o actualizar solicitudes de contratacion: 
     class PendingRequestToGivenProviderError < StandardError
         def message
             "Usted ya posee otra solicitud de contratación pendiente de revision con este proveedor"
