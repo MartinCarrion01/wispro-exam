@@ -20,7 +20,7 @@ class Api::V1::PlansController < ApplicationController
         if @current_provider.save
             render(json: {plan: plan}, status: :created)
         else
-            render(json: {provider: @current_provider.errors}, status: :bad_request)
+            render(json: {message: @current_provider.errors}, status: :bad_request)
         end
     end
 

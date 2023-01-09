@@ -4,7 +4,7 @@ class Api::V1::ProvidersController < ApplicationController
         if provider.save
             render(json: {provider: provider}, status: :created)
         else
-            render(json: {provider: provider.errors}, status: :bad_request)
+            render(json: {message: provider.errors}, status: :bad_request)
         end
     end
 
