@@ -4,7 +4,15 @@
 Aplicación que permite a proveedores de servicios de internet (ISP) registrarse y cargar los planes que ofrecen. También permite el registro de clientes que pueden crear solicitudes de contratación a planes ofrecidos por los ISP, las cuales el último podra o bien, rechazar o aceptar, creando una suscripcion del cliente al plan requerido en el ultimo caso.  
 Los clientes tambien pueden solicitar un cambio de plan al proveedor, pudiendo este ultimo rechazar o aceptar estas solicitudes.
 
-## Dependencias
+# Índice
+- [Dependencias](#dependencias)
+- [¿Como instalar?](#instalar)
+- [¿Como usar la aplicación?](#usar)
+- [Descripcion general de la aplicación](#descripcion-app)
+- [Indice de rutas expuestas](#indice)
+
+<a name='dependencias'></a>
+# Dependencias
 
 Tenemos que cumplir las siguientes dependencias para que el proyecto funcione correctamente:
 
@@ -40,7 +48,7 @@ Esta aplicación tambien necesita la API de PostgreSQL para poder realizar las c
 ```
 sudo apt-get install libpq-dev
 ```
-
+<a name='instalar'></a>
 # ¿Como instalar?
 
 1ro: tenemos que clonar este proyecto en nuestra computadora.
@@ -68,7 +76,7 @@ bin/rails db:migrate
 ```
 bin/rails db:seed
 ```
-
+<a name='usar'></a>
 # ¿Como usar la aplicación? 
 
 Para poder empezar a usar esta aplicación, es necesario iniciar el servidor web con el comando:
@@ -79,6 +87,7 @@ bin/rails server
 
 Para poder realizar peticiones al servidor, podemos usar por ejemplo: Postman o cURL. En este documento, se usará cURL en los ejemplos para cada endpoint
 
+<a name='descripcion-app'></a>
 # Descripción general de la aplicación: 
 
 ## Casos de uso principales de la aplicación: 
@@ -137,7 +146,7 @@ El proveedor tampoco puede aprobar o rechazar solicitudes de cambio de plan que 
 	- [Listar solicitudes de contratacion rechazadas en el ultimo mes a un cliente](#listar-solicitud-rechazada)
   - [Actualizar estado de solicitud de contratación](#actualizar-estado-solicitud)
 - [Solicitud de cambio de plan](#solicitud-cambio)
-	- [Crear solicitud de cambio de plan](#crear-solicitud-cambio)
+  - [Crear solicitud de cambio de plan](#crear-solicitud-cambio)
   - [Actualizar estado de solicitud de cambio de plan](#actualizar-estado-cambio)
 
 # <a name='proveedor'></a> Proveedor
@@ -151,6 +160,14 @@ El proveedor tampoco puede aprobar o rechazar solicitudes de cambio de plan que 
 ```
 POST /api/v1/providers
 ```
+### Headers 
+
+```
+{
+  Content-Type: application/json
+}
+```
+
 ### Body params
 
 <table>
@@ -222,6 +239,13 @@ curl -X POST 'http://127.0.0.1:3000/api/v1/providers' \
 ```
 GET /api/v1/providers/:id/get_token
 ```
+### Headers 
+
+```
+{
+  Content-Type: application/json
+}
+```
 ### Query params
 
 <table>
@@ -268,6 +292,14 @@ curl -X GET 'http://127.0.0.1:3000/api/v1/providers/2/get_token'
 ### Ruta
 ```
 POST /api/v1/plans
+```
+### Headers 
+
+```
+{
+  Content-Type: application/json
+  Authorization: {jwt-token}
+}
 ```
 
 ### Body params
@@ -350,6 +382,13 @@ curl -X POST 'http://127.0.0.1:3000/api/v1/plans' \
 ```
 GET /api/v1/plans
 ```
+### Headers 
+
+```
+{
+  Content-Type: application/json
+}
+```
 
 ### Ejemplo
 
@@ -403,6 +442,15 @@ curl -X GET 'http://127.0.0.1:3000/api/v1/plans'
 ```
 GET /api/v1/providers/:id/plans
 ```
+
+### Headers 
+
+```
+{
+  Content-Type: application/json
+}
+```
+
 ### Query params
 
 <table>
@@ -465,6 +513,13 @@ curl -X GET 'http://127.0.0.1:3000/api/v1/providers/1/plans'
 ### Ruta
 ```
 POST /api/v1/clients
+```
+### Headers 
+
+```
+{
+  Content-Type: application/json
+}
 ```
 
 ### Body params
@@ -571,6 +626,13 @@ curl -X POST 'http://127.0.0.1:3000/api/v1/clients' \
 ```
 POST /api/v1/auth/login
 ```
+### Headers 
+
+```
+{
+  Content-Type: application/json
+}
+```
 
 ### Body params
 
@@ -635,6 +697,14 @@ curl -X POST 'http://127.0.0.1:3000/api/v1/auth/login' \
 ### Ruta
 ```
 POST /api/v1/plans/:plan_id/subscription_requests
+```
+### Headers 
+
+```
+{
+  Content-Type: application/json
+  Authorization: {jwt-token}
+}
 ```
 
 ### Query params
@@ -729,6 +799,16 @@ curl -X POST 'http://127.0.0.1:3000/api/v1/plans/1/subscription_requests' \
 ```
 GET /api/v1/subscription_requests/rejected_last_month
 ```
+
+### Headers 
+
+```
+{
+  Content-Type: application/json
+  Authorization: {jwt-token}
+}
+```
+
 ### Ejemplo
 
 ```
@@ -780,6 +860,15 @@ curl -X GET 'http://127.0.0.1:3000/api/v1/subscription_requests/rejected_last_mo
 ```
 PUT api/v1/subscription_requests/:id/update_status
 PATCH api/v1/subscription_requests/:id/update_status
+```
+
+### Headers 
+
+```
+{
+  Content-Type: application/json
+  Authorization: {jwt-token}
+}
 ```
 
 ### Query params
@@ -835,6 +924,19 @@ curl -X PUT 'http://127.0.0.1:3000/api/v1/subscription_requests/9/update_status'
     }
 }
 ```
+```
+200 OK
+{
+    "subscription_request": {
+        "status": "rejected",
+        "id": 9,
+        "client_id": 5,
+        "plan_id": 14,
+        "created_at": "2023-01-09T01:39:39.636Z",
+        "updated_at": "2023-01-09T01:41:46.722Z"
+    }
+}
+```
 
 ### Respuesta con error
 
@@ -862,6 +964,290 @@ curl -X PUT 'http://127.0.0.1:3000/api/v1/subscription_requests/9/update_status'
 ```
 400 BAD_REQUEST
 {
+    "message": "No puede revisar una solicitud de contratación de un plan que no le pertenece"
+}
+```
+
+```
+400 BAD_REQUEST
+{
+    "message": "La solicitud de contrato requerida ya ha sido revisada"
+}
+```
+
+```
+400 BAD_REQUEST
+{
+  "message": {
+    "{Nombre de la propiedad}": [
+      {
+        "error": "{Motivo de error"},
+        "{Info adicional del error}",
+        ...
+      },
+      ...
+      ],
+      ...
+  }
+}
+```
+
+# <a name='solicitud-cambio'></a> Solicitud de cambio de plan
+
+## <a name='crear-solicitud-cambio'></a> Crear solicitud de cambio de plan
+[Volver al índice](#indice)
+
+<p>Una vez que el cliente tenga contratado cierto plan con un proveedor, este puede crear una solicitud de cambio de plan, para cancelar su suscripcion activa y crear una nueva a otro plan ofrecido por el mismo proveedor. El cliente no puede crear una solicitud de cambio de plan a un proveedor si ya tiene una sin revisar por parte del proveedor ni tampoco si el plan al que quiere cambiarse no forma parte del conjunto de planes que ofrece su proveedor actual. El cliente necesita un token de autorización para completar la operación correctamente</p>
+
+### Ruta
+```
+POST /api/v1/subscription_change_requests
+```
+
+### Headers 
+
+```
+{
+  Content-Type: application/json
+  Authorization: {jwt-token}
+}
+```
+
+### Body params
+
+<table>
+  <tr>
+    <th>Parametro</th>
+    <th>Descripción</th>
+  </tr>
+  <tr>
+    <td>current_subscription_id</td>
+    <td>Representa el id de la suscripción activa que posee el cliente un plan</td>
+  </tr>
+  <tr>
+    <td>new_plan_id</td>
+    <td>Representa el id del plan al cual el cliente quiere cambiarse</td>
+  </tr>
+</table>
+
+### Ejemplo
+
+```
+curl -X POST 'http://127.0.0.1:3000/api/v1/subscription_change_requests' \
+-H 'Authorization: eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOjEsImV4cCI6MTY3Mzg4MDY5Mn0.oJ7TJuMDTDf0eNYXCeuX6YKwm7CUOmUgfGEe75iMfDM' \
+-H 'Content-Type: application/json' \
+--data-raw '{
+    "current_subscription_id": 1,
+    "new_plan_id": 4
+}'
+```
+
+### Respuesta exitosa
+
+```
+201 CREATED
+{
+    "subscription_change_request": {
+        "id": 1,
+        "status": "pending",
+        "subscription_id": 1,
+        "plan_id": 4,
+        "created_at": "2023-01-09T14:55:52.651Z",
+        "updated_at": "2023-01-09T14:55:52.651Z"
+    }
+}
+```
+
+### Respuesta con error
+
+```
+401 UNAUTHORIZED
+{
+    "errors": "Nil JSON web token"
+}
+```
+
+```
+404 NOT_FOUND
+{
+    "message": "No posee una suscripcion activa al plan que desea cambiar"
+}
+```
+
+```
+400 BAD_REQUEST
+{
+    "message": "Usted ya posee una solicitud de cambio pendiente de revision con el proveedor requerido"
+}
+```
+
+```
+404 NOT_FOUND
+{
+    "message": "No existe el plan al cual desea cambiarse"
+}
+```
+
+```
+400 BAD_REQUEST
+{
+    "message": "El plan al cual desea cambiarse no es del mismo proveedor de su plan actual"
+}
+```
+
+```
+400 BAD_REQUEST
+{
+  "message": {
+    "{Nombre de la propiedad}": [
+      {
+        "error": "{Motivo de error"},
+        "{Info adicional del error}",
+        ...
+      },
+      ...
+      ],
+      ...
+  }
+}
+```
+
+## <a name='actualizar-estado-cambio'></a> Actualizar estado de una solicitud de cambio de plan
+[Volver al índice](#indice)
+
+<p>El proveedor actualiza el estado de la solicitud de cambio de plan de un cliente, pudiendola aprobar o rechazar. En caso que la apruebe, se crea una suscripción activa entre el cliente y el plan al que quiere cambiarse y se desactiva la subscripción previa declarada en la misma solicitud. El proveedor no puede revisar solicitudes de cambio de planes que no le pertenecen ni tampoco revisar solicitudes que ya fueron revisadas. El proveedor necesita un token de autorización para completar la operación</p>
+
+### Ruta
+```
+PUT api/v1/subscription_change_requests/:id/update_status
+PATCH api/v1/subscription_change_requests/:id/update_status
+```
+### Headers 
+
+```
+{
+  Content-Type: application/json
+  Authorization: {jwt-token}
+}
+```
+
+### Query params
+
+<table>
+  <tr>
+    <th>Parametro</th>
+    <th>Descripción</th>
+  </tr>
+  <tr>
+    <td>subscription_change_request_id</td>
+    <td>Representa el id de la solicitud que se va a revisar</td>
+  </tr>
+</table>
+
+
+### Body params
+
+<table>
+  <tr>
+    <th>Parametro</th>
+    <th>Descripción</th>
+  </tr>
+  <tr>
+    <td>status</td>
+    <td>Representa el estado final que se va a dar a la solicitud de cambio de plan, solo puede ser igual a "approved" o "rejected"</td>
+  </tr>
+</table>
+
+### Ejemplo
+
+```
+curl -X PUT 'http://127.0.0.1:3000/api/v1/subscription_change_requests/2/update_status' \
+-H 'Authorization: eyJhbGciOiJIUzI1NiJ9.eyJwcm92aWRlcl9pZCI6MSwiZXhwIjoxNjczODgyNDczfQ.VqtSXSNnPRtSAXTyFcijBcjh7cKtJ8eFlTlxwwD_O8E' \
+-H 'Content-Type: application/json' \
+--data-raw '{
+    "status": "approved"
+}'
+```
+
+### Respuesta exitosa
+
+```
+200 OK
+{
+    "subscription_change_request": {
+        "status": "approved",
+        "id": 2,
+        "subscription_id": 1,
+        "plan_id": 4,
+        "created_at": "2023-01-09T15:20:31.214Z",
+        "updated_at": "2023-01-09T15:21:27.224Z"
+    }
+}
+```
+```
+200 OK
+{
+    "subscription_change_request": {
+        "status": "rejected",
+        "id": 2,
+        "subscription_id": 1,
+        "plan_id": 4,
+        "created_at": "2023-01-09T15:20:31.214Z",
+        "updated_at": "2023-01-09T15:21:27.224Z"
+    }
+}
+```
+
+### Respuesta con error
+
+```
+401 UNAUTHORIZED
+{
+    "errors": "Nil JSON web token"
+}
+```
+
+```
+400 BAD_REQUEST
+{
     "message": "Solo se puede cambiar la solicitud a los estados 'approved' y 'rejected'"
+}
+```
+
+```
+404 NOT_FOUND
+{
+    "message": "La solicitud de cambio de plan requerida no existe"
+}
+```
+
+```
+400 BAD_REQUEST
+{
+    "message": "No puede revisar una solicitud de cambio de un plan que no le pertenece"
+}
+```
+
+```
+400 BAD_REQUEST
+{
+    "message": "La solicitud de cambio de plan requerida ya ha sido revisada"
+}
+```
+
+```
+400 BAD_REQUEST
+{
+  "message": {
+    "{Nombre de la propiedad}": [
+      {
+        "error": "{Motivo de error"},
+        "{Info adicional del error}",
+        ...
+      },
+      ...
+      ],
+      ...
+  }
 }
 ```
