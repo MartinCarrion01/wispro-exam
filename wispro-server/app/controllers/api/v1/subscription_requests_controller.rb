@@ -4,29 +4,29 @@ class Api::V1::SubscriptionRequestsController < ApplicationController
 
     def create
         begin
-            subscription_request = SubscriptionRequest.create_subscription_request(params[:plan_id], @current_client)
-            render(json: {subscription_request: subscription_request}, status: :created)
+            created_subscription_request = SubscriptionRequest.create_subscription_request(params[:plan_id], @current_client)
+            render(json: {subscription_request: created_subscription_request}, status: :created)
         rescue ActiveRecord::RecordNotFound => exception
             render(json: {message: exception.message}, status: :not_found)
         rescue ActiveRecord::RecordInvalid => exception
             render(json: {message: exception.record.errors}, status: :bad_request)
-        rescue SubscriptionRequest::PendingRequestToGivenProviderError,
-             SubscriptionRequest::ActivePlanWithGivenProviderError => exception
+        rescue SubscriptionRequest::ClientHasPendingRequestToGivenProviderError,
+             SubscriptionRequest::ClientHasActiveSubscriptionToGivenProviderError => exception
             render(json: {message: exception.message}, status: :bad_request)
         end
     end
 
     def update_status
         begin
-            subscription_request = SubscriptionRequest.update_status(params[:id], params[:status], @current_provider)
-            render(json: {subscription_request: subscription_request}, status: :ok)
+            updated_subscription_request = SubscriptionRequest.update_status(params[:id], params[:status], @current_provider)
+            render(json: {subscription_request: updated_subscription_request}, status: :ok)
         rescue ActiveRecord::RecordNotFound => exception
             render(json: {message: exception.message}, status: :not_found)
         rescue ActiveRecord::RecordInvalid => exception
             render(json: {message: exception.record.errors}, status: :bad_request)
         rescue SubscriptionRequest::InvalidStatusParametersError,
-             SubscriptionRequest::ProviderCantUpdateRequestError, 
-             SubscriptionRequest::NotUpdatableRequestError => exception
+             SubscriptionRequest::ProviderIsNotOwnerOfThePlanInRequestError, 
+             SubscriptionRequest::SubscriptionRequestHasBeenUpdatedAlreadyError => exception
             render(json: {message: exception.message}, status: :bad_request)
         end
     end
