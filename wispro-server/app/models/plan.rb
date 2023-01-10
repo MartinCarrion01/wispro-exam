@@ -1,6 +1,8 @@
 class Plan < ApplicationRecord
     validates :description, presence: true
 
+    belongs_to :provider
+    
     has_many :subscription_requests
     has_many :clients, through: :subscription_requests
 

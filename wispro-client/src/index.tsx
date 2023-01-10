@@ -9,6 +9,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import SubscriptionRequests from "./pages/SubscriptionRequests";
 
 const theme = extendTheme({
   fonts: {
@@ -27,9 +28,10 @@ root.render(
         <Routes>
           <Route path="/" element={<App />}>
             <Route index element={<Home />} />
+            <Route path="/subscription_requests" element={<SubscriptionRequests />} />
           </Route>
-          <Route path={"/login"} element={<Login />} />
-          <Route path={"/register"} element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
       </ChakraProvider>
     </BrowserRouter>

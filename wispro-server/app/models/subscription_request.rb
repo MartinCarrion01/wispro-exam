@@ -4,6 +4,10 @@ class SubscriptionRequest < ApplicationRecord
     belongs_to :client
     belongs_to :plan
 
+    def create_date
+        self.created_at.strftime("%d/%m/%Y")
+    end
+
     def self.create_subscription_request(plan_id, client)  
         plan = Plan.find_by(id: plan_id)
         if plan.nil?

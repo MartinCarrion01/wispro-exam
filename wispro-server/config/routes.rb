@@ -14,7 +14,7 @@ Rails.application.routes.draw do
       resources :plans, only: %i[index create] do
         resources :subscription_requests, only: %i[create]
       end
-      resources :subscription_requests, only: %i[] do
+      resources :subscription_requests, only: %i[index] do
         member do
           put :update_status
           patch :update_status

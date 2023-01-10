@@ -24,7 +24,7 @@ import { logout } from "../../services/ClientService";
 const availableLinks = [
   { name: "Inicio", route: "/" },
   { name: "Planes", route: "/plans" },
-  { name: "Mis solicitudes de contratación", route: "/subscription-requests" },
+  { name: "Mis solicitudes de contratación", route: "/subscription_requests" },
 ];
 
 export default function Navbar() {
@@ -60,7 +60,7 @@ export default function Navbar() {
           <Flex alignItems={"center"}>
             <Menu>
               <MenuButton as={Button} rightIcon={<ChevronDownIcon />}>
-                {`${client?.first_name} ${client?.last_name}`}
+                {client ? `${client.first_name} ${client.last_name}` : ""}
               </MenuButton>
               <MenuList>
                 <MenuItem onClick={logout}>Cerrar sesión</MenuItem>
