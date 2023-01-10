@@ -141,6 +141,7 @@ El proveedor tampoco puede aprobar o rechazar solicitudes de cambio de plan que 
 - [Cliente](#cliente)
 	- [Registrar cliente](#registrar-cliente)
 	- [Login](#login)
+	- [Cliente actual](#cliente-actual)
 - [Solicitud de contratacion](#solicitud-contratacion)
 	- [Crear solicitud de contratacion](#crear-solicitud-contratacion)
 	- [Listar solicitudes de contratacion rechazadas en el ultimo mes a un cliente](#listar-solicitud-rechazada)
@@ -352,7 +353,14 @@ curl -X POST 'http://127.0.0.1:3000/api/v1/plans' \
 ```
 401 UNAUTHORIZED
 {
-    "errors": "Nil JSON web token"
+    "message": "Nil JSON web token"
+}
+```
+
+```
+401 UNAUTHORIZED
+{
+    "message": "No se pudo encontrar un proveedor usando el token de autorizacion"
 }
 ```
 
@@ -687,6 +695,64 @@ curl -X POST 'http://127.0.0.1:3000/api/v1/auth/login' \
 }
 ```
 
+## <a name='cliente-actual'></a> Cliente actual
+[Volver al índice](#indice)
+
+<p>Devuelve un cliente usando el valor del encabezado de autorización</p>
+
+### Ruta
+```
+GET /api/v1/clients/current
+```
+### Headers 
+
+```
+{
+  Content-Type: application/json
+  Authorization: {jwt-token}
+}
+```
+
+### Ejemplo
+
+```
+curl -X GET 'http://127.0.0.1:3001/api/v1/clients/current' \
+-H 'Authorization: eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOjEsImV4cCI6MTY3MzkyMzc3NH0.wbdbrtk_oIiNEpzKc_0RMLF375-foPcDKf0iWx9PwJ4'
+```
+
+### Respuesta exitosa
+
+```
+200 OK
+{
+    "client": {
+        "id": 1,
+        "username": "martin",
+        "password_digest": "$2a$12$hcXFmkRoR9CjOhZ4tOl.vuJRqx1VmmoXpLw1utdtygbyhaWWdUtQ.",
+        "first_name": "Martin",
+        "last_name": "Carrion",
+        "created_at": "2023-01-09T22:26:23.566Z",
+        "updated_at": "2023-01-09T22:26:23.566Z"
+    }
+}
+```
+
+### Respuesta con error
+
+```
+401 UNAUTHORIZED
+{
+    "message": "Nil JSON web token"
+}
+```
+
+```
+401 UNAUTHORIZED
+{
+    "message": "No se pudo encontrar un cliente usando el token de autorizacion"
+}
+```
+
 # <a name='solicitud-contratacion'></a> Solicitud de contratación
 
 ## <a name='crear-solicitud-contratacion'></a> Crear solicitud de contratación
@@ -748,7 +814,14 @@ curl -X POST 'http://127.0.0.1:3000/api/v1/plans/1/subscription_requests' \
 ```
 401 UNAUTHORIZED
 {
-    "errors": "Nil JSON web token"
+    "message": "Nil JSON web token"
+}
+```
+
+```
+401 UNAUTHORIZED
+{
+    "message": "No se pudo encontrar un cliente usando el token de autorizacion"
 }
 ```
 
@@ -847,7 +920,14 @@ curl -X GET 'http://127.0.0.1:3000/api/v1/subscription_requests/rejected_last_mo
 ```
 401 UNAUTHORIZED
 {
-    "errors": "Nil JSON web token"
+    "message": "Nil JSON web token"
+}
+```
+
+```
+401 UNAUTHORIZED
+{
+    "message": "No se pudo encontrar un cliente usando el token de autorizacion"
 }
 ```
 
@@ -943,7 +1023,14 @@ curl -X PUT 'http://127.0.0.1:3000/api/v1/subscription_requests/9/update_status'
 ```
 401 UNAUTHORIZED
 {
-    "errors": "Nil JSON web token"
+    "message": "Nil JSON web token"
+}
+```
+
+```
+401 UNAUTHORIZED
+{
+    "message": "No se pudo encontrar un proveedor usando el token de autorizacion"
 }
 ```
 
@@ -1063,7 +1150,14 @@ curl -X POST 'http://127.0.0.1:3000/api/v1/subscription_change_requests' \
 ```
 401 UNAUTHORIZED
 {
-    "errors": "Nil JSON web token"
+    "message": "Nil JSON web token"
+}
+```
+
+```
+401 UNAUTHORIZED
+{
+    "message": "No se pudo encontrar un cliente usando el token de autorizacion"
 }
 ```
 
@@ -1203,7 +1297,14 @@ curl -X PUT 'http://127.0.0.1:3000/api/v1/subscription_change_requests/2/update_
 ```
 401 UNAUTHORIZED
 {
-    "errors": "Nil JSON web token"
+    "message": "Nil JSON web token"
+}
+```
+
+```
+401 UNAUTHORIZED
+{
+    "message": "No se pudo encontrar un proveedor usando el token de autorizacion"
 }
 ```
 
