@@ -1,23 +1,26 @@
 import { Button, Flex } from "@chakra-ui/react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { login } from "../../services/ClientService";
 import AlertMessage from "../common/AlertMessage";
 import Form from "../common/Form";
 import InputText from "../common/InputText";
-import { login } from "../../services/userService";
 
 export default function LoginForm() {
   const [username, setUsername] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    setLoading(true)
     try {
       await login(username, password);
       navigate("/");
     } catch (error: any) {
       setErrorMessage(error.response.data.message);
+      setLoading(false)
     }
   };
 
@@ -46,7 +49,8 @@ export default function LoginForm() {
         <Button
           colorScheme={"teal"}
           onClick={handleLogin}
-          disabled={username === "" || password === ""}
+          disabled={username === "" || password === "" || loading}
+          isLoading={loading}
         >
           Ingresar
         </Button>

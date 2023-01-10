@@ -18,12 +18,12 @@ export function useSessionClient() {
   return client;
 }
 
-export function setClient(client: Client) {
+export function setCurrentClient(client: Client) {
   currentClient = client;
   clientSubject.next(currentClient);
 }
 
-export function cleanupClient() {
+export function cleanupCurrentClient() {
   currentClient = undefined;
   clientSubject.next(currentClient);
 }

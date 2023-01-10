@@ -1,4 +1,5 @@
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
+import { cleanupCurrentClient, setCurrentClient } from "../store/ClientStore";
 import { environment } from "../utils/Environment";
 
 export interface Client {
@@ -9,27 +10,36 @@ export interface Client {
   last_name: string;
 }
 
-export async function login(username: string, password: string) {
-  const response: AxiosResponse = await axios.post(
-    `${environment.api_url}/auth/login`,
-    { username, password }
-  );
-
-  const client = response.data["client"] as Client;
-
-  axios.defaults.headers.common["Authorization"] = "Bearer " + player._id.$oid;
-  setUser(player);
-  return response;
+export interface Token {
+  token: string;
 }
 
-export async function register(username: string, password: string) {
-  const response: AxiosResponse = await axios.post(
-    `${environment.server_url}/players`,
-    { username, password }
-  );
-  const player = response.data["player"] as Player;
+export async function login(username: string, password: string) {
+  const res = await axios.post(environment.api_url + "/auth/login", {
+    username,
+    password,
+  });
 
-  axios.defaults.headers.common["Authorization"] = "Bearer " + player._id.$oid;
-  setUser(player);
-  return response;
+  const token = res.data["token"];
+  axios.defaults.headers.common.Authorization = token;
+
+  await setClient();
+
+  return res;
+}
+
+async function setClient() {
+  const res = await axios.get(environment.api_url + "/clients/current");
+  const client = res.data["client"];
+  setCurrentClient(client);
+}
+
+export async function register(client: Client) {
+  const res = await axios.post(environment.api_url + "/clients", { client });
+  return res;
+}
+
+export async function logout() {
+  axios.defaults.headers.common.Authorization = "";
+  cleanupCurrentClient();
 }

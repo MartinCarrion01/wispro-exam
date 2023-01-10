@@ -7,7 +7,7 @@ interface Props {
 export default function SubTitle(props: Props) {
   return (
     <>
-      <Center color="#222831">
+      <Center color="#222831" my={2}>
         <Heading as="h4" noOfLines={1}>
           {props.text}
         </Heading>

@@ -3,21 +3,16 @@ import RedirectToFormPrompt from "../components/common/RedirectToFormPrompt";
 import SubTitle from "../components/common/Subtitle";
 import Title from "../components/common/Title";
 import HalfWidthCenter from "../components/common/HalfWidthCenter";
-import LoginForm from "../components/login/LoginForm";
+import RegisterForm from "../components/register/RegisterForm";
 
-export default function Login() {
+export default function Register() {
   return (
     <>
       <Flex direction="column" align="center" justify="center" my="50">
         <HalfWidthCenter>
           <Title title={"Wispro Client"} color={"black"} />
-          <SubTitle text={"Iniciar sesión"} />
-          <LoginForm />
-          <RedirectToFormPrompt
-            auxiliaryText="¿No tiene una cuenta? "
-            linkText="Registrese."
-            redirectRoute="register"
-          />
+          <SubTitle text={"Registrarse"} />
+          <RegisterForm />
         </HalfWidthCenter>
       </Flex>
     </>
