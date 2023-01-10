@@ -29,7 +29,11 @@ Rails.application.routes.draw do
           patch :update_status
         end
       end
-      resources :clients, only: %i[create]
+      resources :clients, only: %i[create] do
+        collection do
+          get :current
+        end
+      end
       resources :auth, only: [] do
         collection do
           post :login
