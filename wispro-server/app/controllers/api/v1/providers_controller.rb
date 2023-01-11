@@ -9,7 +9,7 @@ class Api::V1::ProvidersController < ApplicationController
     end
 
     def get_token
-        provider = Provider.find_by(id: params[:id])
+        provider = Provider.find(params[:id])
         if provider.present?
             token = jwt_encode(provider_id: provider.id)
             render(json: {token: token}, status: :ok)

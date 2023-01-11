@@ -2,12 +2,8 @@ class Api::V1::ClientsController < ApplicationController
     before_action :authenticate_client, only: %i[current]
 
     def create
-        client = Client.new(client_params)
-        if client.save
-            render(json: {client: client}, status: :ok)
-        else
-            render(json: {message: client.errors}, status: :bad_request)
-        end 
+        client = Client.create!(client_params)
+        render(json: {client: client}, status: :ok)
     end
 
     def current
