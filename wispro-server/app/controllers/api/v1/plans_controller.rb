@@ -2,12 +2,8 @@ class Api::V1::PlansController < ApplicationController
     before_action :authenticate_provider, only: %i[create]
 
     def create
-        plan = @current_provider.plans.build(plan_params)
-        if @current_provider.save
-            render(json: {plan: plan}, status: :created)
-        else
-            render(json: {message: @current_provider.errors}, status: :bad_request)
-        end
+        plan = @current_provider.plans.create!(plan_params)
+        render(json: {plan: plan}, status: :created)
     end
 
     private

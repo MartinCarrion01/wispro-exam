@@ -8,6 +8,7 @@ class Client < ApplicationRecord
 
     has_many :subscription_requests
     has_many :plans, through: :subscription_requests
+    
     has_many :subscriptions
     has_many :plans, through: :subscriptions
 
