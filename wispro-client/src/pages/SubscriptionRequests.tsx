@@ -1,5 +1,4 @@
-import { Flex, Heading, Spacer, Stack, Text } from "@chakra-ui/react";
-import Title from "../components/common/Title";
+import { Flex, Heading} from "@chakra-ui/react";
 import SubscriptionRequestsTab from "../components/subscription_requests/SubscriptionRequestsTab";
 
 export default function SubscriptionRequests() {

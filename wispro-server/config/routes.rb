@@ -6,12 +6,14 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       resources :providers, only: %i[create] do
+        collection do
+          get :get_plans
+        end
         member do
           get :get_token
         end
-        resources :plans, only: %i[index]
       end
-      resources :plans, only: %i[index create] do
+      resources :plans, only: %i[create] do
         resources :subscription_requests, only: %i[create]
       end
       resources :subscription_requests, only: %i[index] do

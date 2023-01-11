@@ -1,20 +1,6 @@
 class Api::V1::PlansController < ApplicationController    
     before_action :authenticate_provider, only: %i[create]
 
-    def index
-        begin
-            if params[:provider_id].present?
-                plans = Plan.list_by_provider(params[:provider_id])
-                render(json: {plans: plans}, status: :ok)
-            else
-                plans = Plan.all
-                render(json: {plans: plans}, status: :ok)
-            end
-        rescue ActiveRecord::RecordNotFound => exception
-            render(json: {message: exception.message}, status: :not_found)
-        end
-    end
-
     def create
         plan = @current_provider.plans.build(plan_params)
         if @current_provider.save

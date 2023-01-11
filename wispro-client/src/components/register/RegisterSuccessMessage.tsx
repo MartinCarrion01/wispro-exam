@@ -1,6 +1,5 @@
 import {
   Alert,
-  AlertDescription,
   AlertIcon,
   AlertTitle,
   Button,

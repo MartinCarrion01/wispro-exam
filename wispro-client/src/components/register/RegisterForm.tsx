@@ -1,6 +1,5 @@
-import { Button, Flex } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Client, register } from "../../services/ClientService";
 import AlertMessage from "../common/AlertMessage";
 import Form from "../common/Form";
@@ -17,7 +16,6 @@ export default function RegisterForm() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
-  const navigate = useNavigate();
 
   const handleRegister = async () => {
     setLoading(true);

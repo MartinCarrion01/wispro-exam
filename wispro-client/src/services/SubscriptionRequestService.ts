@@ -28,3 +28,11 @@ export async function get_rejected_requests() {
 
   return res;
 }
+
+export async function create_request(plan_id: string) {
+  const res = await axios.post(
+    environment.api_url + "/plans/" + plan_id + "/subscription_requests"
+  );
+
+  return res;
+}

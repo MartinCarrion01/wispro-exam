@@ -1,8 +1,5 @@
 import "./App.css";
-import { Outlet, Route, Routes, useNavigate } from "react-router-dom";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
+import { Outlet, useNavigate } from "react-router-dom";
 import { useSessionClient } from "./store/ClientStore";
 import { useEffect } from "react";
 import Navbar from "./components/common/Navbar";

@@ -3,13 +3,13 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
 import App from "./App";
-import reportWebVitals from "./reportWebVitals";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import SubscriptionRequests from "./pages/SubscriptionRequests";
+import Plans from "./pages/Plans";
 
 const theme = extendTheme({
   fonts: {
@@ -28,6 +28,7 @@ root.render(
         <Routes>
           <Route path="/" element={<App />}>
             <Route index element={<Home />} />
+            <Route path="/plans" element={<Plans />} />
             <Route path="/subscription_requests" element={<SubscriptionRequests />} />
           </Route>
           <Route path="/login" element={<Login />} />

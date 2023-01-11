@@ -2,20 +2,16 @@ import {
   Box,
   Flex,
   HStack,
-  Link,
   IconButton,
   Button,
   Menu,
   MenuButton,
   MenuList,
   MenuItem,
-  MenuDivider,
   useDisclosure,
   Stack,
-  Spacer,
 } from "@chakra-ui/react";
 import { HamburgerIcon, CloseIcon, ChevronDownIcon } from "@chakra-ui/icons";
-import { useNavigate } from "react-router-dom";
 import NavLink from "./NavLink";
 import { useSessionClient } from "../../store/ClientStore";
 import SubTitle from "./Subtitle";
@@ -29,7 +25,6 @@ const availableLinks = [
 
 export default function Navbar() {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const navigate = useNavigate();
   const client = useSessionClient();
 
   return (

@@ -13,7 +13,7 @@ export default function AlertMessage(props: Props) {
       variant="solid"
       borderRadius={15}
       mb="5"
-      maxWidth={"xl"}
+      maxWidth={props.width ? props.width : "xl"}
       textAlign="center"
       justifyContent="center"
     >

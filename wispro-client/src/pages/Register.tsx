@@ -1,5 +1,4 @@
 import { Flex } from "@chakra-ui/react";
-import RedirectToFormPrompt from "../components/common/RedirectToFormPrompt";
 import SubTitle from "../components/common/Subtitle";
 import Title from "../components/common/Title";
 import HalfWidthCenter from "../components/common/HalfWidthCenter";
