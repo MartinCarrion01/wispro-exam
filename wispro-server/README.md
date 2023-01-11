@@ -134,16 +134,16 @@ El proveedor tampoco puede aprobar o rechazar solicitudes de cambio de plan que 
 - [Proveedor](#proveedor)
 	- [Registrar proveedor](#registrar-proveedor)
   - [Obtener token de autorización](#token-proveedor)
+  - [Listar proveedores con sus planes agrupados](#listar-grupos-plan)
 - [Plan](#plan-link)
 	- [Registrar plan](#registrar-plan)
-	- [Listar planes](#listar-planes)
-  - [Listar planes por proveedor](#listar-planes-proveedor)
 - [Cliente](#cliente)
 	- [Registrar cliente](#registrar-cliente)
 	- [Login](#login)
 	- [Cliente actual](#cliente-actual)
 - [Solicitud de contratacion](#solicitud-contratacion)
 	- [Crear solicitud de contratacion](#crear-solicitud-contratacion)
+	- [Listar solicitudes de contratación del cliente](#solicitud-contratacion-cliente)
 	- [Listar solicitudes de contratacion rechazadas en el ultimo mes a un cliente](#listar-solicitud-rechazada)
   - [Actualizar estado de solicitud de contratación](#actualizar-estado-solicitud)
 - [Solicitud de cambio de plan](#solicitud-cambio)
@@ -283,6 +283,102 @@ curl -X GET 'http://127.0.0.1:3000/api/v1/providers/2/get_token'
     "message": "El proveedor solicitado no existe"
 }
 ```
+
+## <a name='listar-grupos-plan'></a> Listar proveedores con sus planes agrupados
+[Volver al índice](#indice)
+
+<p>Lista todos los provedores juntos el grupo de planes que estos ofrecen cada uno.</p>
+
+### Ruta
+```
+GET /api/v1/providers/get_plans
+```
+### Headers 
+
+```
+{
+  Content-Type: application/json
+}
+```
+
+### Ejemplo
+
+```
+curl -X GET 'http://127.0.0.1:3001/api/v1/providers/get_plans'
+```
+
+### Respuesta exitosa
+
+```
+200 OK
+{
+    "providers": [
+        {
+            "id": 1,
+            "name": "ISP1",
+            "plans": [
+                {
+                    "id": 1,
+                    "description": "50 mb simetrico"
+                },
+                {
+                    "id": 4,
+                    "description": "10 mb simetrico"
+                }
+            ]
+        },
+        {
+            "id": 2,
+            "name": "ISP2",
+            "plans": [
+                {
+                    "id": 2,
+                    "description": "100 mb asimetrico"
+                },
+                {
+                    "id": 7,
+                    "description": "10 mb simetrico"
+                }
+            ]
+        },
+        {
+            "id": 3,
+            "name": "ISP3",
+            "plans": [
+                {
+                    "id": 3,
+                    "description": "100 mb simetrico"
+                },
+                {
+                    "id": 8,
+                    "description": "10 mb simetrico"
+                }
+            ]
+        },
+        {
+            "id": 4,
+            "name": "ISP4",
+            "plans": [
+                {
+                    "id": 5,
+                    "description": "10 mb simetrico"
+                }
+            ]
+        },
+        {
+            "id": 5,
+            "name": "ISP5",
+            "plans": [
+                {
+                    "id": 6,
+                    "description": "10 mb simetrico"
+                }
+            ]
+        }
+    ]
+}
+```
+
 # <a name='plan-link'></a> Plan
 
 ## <a name='registrar-plan'></a> Registrar plan
@@ -378,136 +474,6 @@ curl -X POST 'http://127.0.0.1:3000/api/v1/plans' \
       ],
       ...
   }
-}
-```
-
-## <a name='listar-planes'></a> Listar planes
-[Volver al índice](#indice)
-
-<p>Se listan todos los planes que existen</p>
-
-### Ruta
-```
-GET /api/v1/plans
-```
-### Headers 
-
-```
-{
-  Content-Type: application/json
-}
-```
-
-### Ejemplo
-
-```
-curl -X GET 'http://127.0.0.1:3000/api/v1/plans'
-```
-
-### Respuesta exitosa
-
-```
-200 OK
-{
-    "plans": [
-        {
-            "id": 1,
-            "description": "50 mb simetrico",
-            "provider_id": 1,
-            "created_at": "2023-01-09T00:18:54.181Z",
-            "updated_at": "2023-01-09T00:18:54.181Z"
-        },
-        {
-            "id": 2,
-            "description": "30 mb asimetrico",
-            "provider_id": 1,
-            "created_at": "2023-01-09T00:18:54.230Z",
-            "updated_at": "2023-01-09T00:18:54.230Z"
-        },
-        {
-            "id": 3,
-            "description": "100 mb asimetrico",
-            "provider_id": 2,
-            "created_at": "2023-01-09T00:18:54.264Z",
-            "updated_at": "2023-01-09T00:18:54.264Z"
-        },
-        {
-            "id": 4,
-            "description": "40mb asimetrico",
-            "provider_id": 3,
-            "created_at": "2023-01-09T00:35:06.691Z",
-            "updated_at": "2023-01-09T00:35:06.691Z"
-        }
-    ]
-}
-```
-## <a name='listar-planes-proveedor'></a> Listar planes por proveedor
-[Volver al índice](#indice)
-
-<p>Se listan todos los planes que posee cierto proveedor</p>
-
-### Ruta
-```
-GET /api/v1/providers/:id/plans
-```
-
-### Headers 
-
-```
-{
-  Content-Type: application/json
-}
-```
-
-### Query params
-
-<table>
-  <tr>
-    <th>Parametro</th>
-    <th>Descripción</th>
-  </tr>
-  <tr>
-    <td>id</td>
-    <td>Representa el id del proveedor al que le queremos consultar sus planes</td>
-  </tr>
-</table>
-
-### Ejemplo
-
-```
-curl -X GET 'http://127.0.0.1:3000/api/v1/providers/1/plans'
-```
-
-### Respuesta exitosa
-
-```
-200 OK
-{
-    "plans": [
-        {
-            "id": 1,
-            "description": "50 mb simetrico",
-            "provider_id": 1,
-            "created_at": "2023-01-09T00:18:54.181Z",
-            "updated_at": "2023-01-09T00:18:54.181Z"
-        },
-        {
-            "id": 2,
-            "description": "30 mb asimetrico",
-            "provider_id": 1,
-            "created_at": "2023-01-09T00:18:54.230Z",
-            "updated_at": "2023-01-09T00:18:54.230Z"
-        }
-    ]
-}
-```
-
-### Respuesta con error
-
-```
-404 NOT_FOUND
-{
-    "message": "El proveedor solicitado no existe"
 }
 ```
 
@@ -860,6 +826,112 @@ curl -X POST 'http://127.0.0.1:3000/api/v1/plans/1/subscription_requests' \
       ],
       ...
   }
+}
+```
+## <a name='solicitud-contratacion-cliente'></a> Listar solicitudes de contratación realizadas por el cliente actual
+[Volver al índice](#indice)
+
+<p>Se listan todas las solicitudes de contratación que realizó el cliente actual. Para listarlas, se necesita un token de autorización del cliente</p>
+
+### Ruta
+```
+GET /api/v1/subscription_requests
+```
+
+### Headers 
+
+```
+{
+  Content-Type: application/json
+  Authorization: {jwt-token}
+}
+```
+
+### Ejemplo
+
+```
+curl -X GET 'http://127.0.0.1:3001/api/v1/subscription_requests/' \
+-H 'Authorization: eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOjEsImV4cCI6MTY3NDA1MDA2OX0.wp7p-Nu8cbG_Wbspqn8sVJQ7zIeWkMMjeCAiN1cpoCo'
+```
+
+### Respuesta exitosa
+
+```
+200 OK
+{
+    "subscription_requests": [
+        {
+            "id": 1,
+            "status": "pending",
+            "create_date": "11/01/2023",
+            "plan": {
+                "description": "100 mb simetrico",
+                "provider": {
+                    "name": "ISP3"
+                }
+            }
+        },
+        {
+            "id": 2,
+            "status": "rejected",
+            "create_date": "11/01/2023",
+            "plan": {
+                "description": "50 mb simetrico",
+                "provider": {
+                    "name": "ISP1"
+                }
+            }
+        },
+        {
+            "id": 3,
+            "status": "rejected",
+            "create_date": "11/01/2023",
+            "plan": {
+                "description": "100 mb asimetrico",
+                "provider": {
+                    "name": "ISP2"
+                }
+            }
+        },
+        {
+            "id": 4,
+            "status": "pending",
+            "create_date": "11/01/2023",
+            "plan": {
+                "description": "10 mb simetrico",
+                "provider": {
+                    "name": "ISP4"
+                }
+            }
+        },
+        {
+            "id": 5,
+            "status": "pending",
+            "create_date": "11/01/2023",
+            "plan": {
+                "description": "10 mb simetrico",
+                "provider": {
+                    "name": "ISP5"
+                }
+            }
+        }
+    ]
+}
+```
+
+### Respuesta con error
+
+```
+401 UNAUTHORIZED
+{
+    "message": "Nil JSON web token"
+}
+```
+
+```
+401 UNAUTHORIZED
+{
+    "message": "No se pudo encontrar un cliente usando el token de autorizacion"
 }
 ```
 
