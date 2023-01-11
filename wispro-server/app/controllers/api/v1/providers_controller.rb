@@ -1,15 +1,11 @@
 class Api::V1::ProvidersController < ApplicationController
     def create
-        provider = Provider.new(provider_params)
-        if provider.save
-            render(json: {provider: provider}, status: :created)
-        else
-            render(json: {message: provider.errors}, status: :bad_request)
-        end
+        provider = Provider.create!(provider_params)
+        render(json: {provider: provider}, status: :created)
     end
 
     def get_token
-        provider = Provider.find(params[:id])
+        provider = Provider.find_by(id: params[:id])
         if provider.present?
             token = jwt_encode(provider_id: provider.id)
             render(json: {token: token}, status: :ok)
