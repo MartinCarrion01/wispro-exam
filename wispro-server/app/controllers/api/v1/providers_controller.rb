@@ -24,6 +24,7 @@ class Api::V1::ProvidersController < ApplicationController
                                                 include: {plans: {only: [:id, :description]}})
         render(json: {providers: formatted_providers}, status: :ok)
     end
+    
     private
     def provider_params
         params.require(:provider).permit(:name)
