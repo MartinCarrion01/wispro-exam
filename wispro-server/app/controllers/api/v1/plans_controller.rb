@@ -3,6 +3,7 @@ class Api::V1::PlansController < ApplicationController
 
     def create
         plan = @current_provider.plans.build(plan_params)
+        
         if @current_provider.save
             render(json: {plan: plan}, status: :created)
         else

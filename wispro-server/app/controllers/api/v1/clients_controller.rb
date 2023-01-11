@@ -3,6 +3,7 @@ class Api::V1::ClientsController < ApplicationController
 
     def create
         client = Client.create!(client_params)
+        
         render(json: {client: client}, status: :ok)
     end
 

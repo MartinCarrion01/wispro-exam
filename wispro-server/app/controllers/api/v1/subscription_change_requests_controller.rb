@@ -4,12 +4,17 @@ class Api::V1::SubscriptionChangeRequestsController < ApplicationController
     
     def create
         created_subscription_change_request = SubscriptionChangeRequest
-        .create_subscription_change_request(params[:current_subscription_id], params[:new_plan_id], @current_client)
+        .create_subscription_change_request(params[:current_subscription_id],
+                                            params[:new_plan_id],
+                                            @current_client)
+        
         render(json: {subscription_change_request: created_subscription_change_request}, status: :created)
     end
 
     def update_status
-        updated_subscription_change_request = SubscriptionChangeRequest.update_status(params[:id], params[:status], @current_provider)
+        updated_subscription_change_request = SubscriptionChangeRequest
+        .update_status(params[:id], params[:status], @current_provider)
+        
         render(json: {subscription_change_request: updated_subscription_change_request}, status: :ok)
     end
 end
