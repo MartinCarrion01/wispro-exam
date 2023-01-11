@@ -11,13 +11,15 @@ class Api::V1::SubscriptionRequestsController < ApplicationController
     end
 
     def create
-        created_subscription_request = SubscriptionRequest.create_subscription_request(params[:plan_id], @current_client)
+        created_subscription_request = SubscriptionRequest
+        .create_subscription_request(params[:plan_id], @current_client)
         
         render(json: {subscription_request: created_subscription_request}, status: :created)
     end
 
     def update_status
-        updated_subscription_request = SubscriptionRequest.update_status(params[:id], params[:status], @current_provider)
+        updated_subscription_request = SubscriptionRequest
+        .update_status(params[:id], params[:status], @current_provider)
         
         render(json: {subscription_request: updated_subscription_request}, status: :ok)
     end

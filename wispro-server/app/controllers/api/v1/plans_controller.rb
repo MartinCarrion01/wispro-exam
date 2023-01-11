@@ -3,6 +3,7 @@ class Api::V1::PlansController < ApplicationController
 
     def create
         plan = @current_provider.plans.create!(plan_params)
+        
         render(json: {plan: plan}, status: :created)
     end
 
