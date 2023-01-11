@@ -5,16 +5,16 @@ class ApplicationController < ActionController::API
     include Authenticable
 
     #Manejo de errores que surgen en la aplicación
-    rescue_from ActiveRecord::RecordNotFound, with: :handle_record_not_found_error
-    rescue_from ActiveRecord::RecordInvalid, with: :handle_record_invalid_error
     rescue_from StandardError, with: :handle_standard_error
+    rescue_from ActiveRecord::RecordInvalid, with: :handle_record_invalid_error
+    rescue_from ActiveRecord::RecordNotFound, with: :handle_record_not_found_error
     
     def handle_record_not_found_error(error)
-        render(json: {error: error.message}, status: :not_found)
+        render(json: {message: error.message}, status: :not_found)
     end
 
     def handle_record_invalid_error(error)
-        render(json: {error: error.record.errors}, status: :bad_request)
+        render(json: {message: error.record.errors}, status: :bad_request)
     end
 
     def handle_standard_error(error)
