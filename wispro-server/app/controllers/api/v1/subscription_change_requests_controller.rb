@@ -4,7 +4,7 @@ class Api::V1::SubscriptionChangeRequestsController < ApplicationController
     
     def create
         created_subscription_change_request = SubscriptionChangeRequest
-        .create_subscription_change_request(params[:current_subscription_id],
+        .create_subscription_change_request(params[:current_plan_id],
                                             params[:new_plan_id],
                                             @current_client)
         
