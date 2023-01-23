@@ -5,6 +5,7 @@ class Api::V1::SubscriptionRequestsController < ApplicationController
     def index
         subscription_requests = SubscriptionRequest.where(client_id: client.id)
         formatted_subscription_requests = format_subscription_requests(subscription_requests)
+        
         render(json: {subscription_requests: formatted_subscription_requests}, status: :ok)
     end
 
@@ -35,6 +36,7 @@ class Api::V1::SubscriptionRequestsController < ApplicationController
     def rejected_last_month
         rejected_requests = client.rejected_requests_last_month
         formatted_rejected_requests = format_subscription_requests(rejected_requests)
+        
         render(json: {subscription_requests: formatted_rejected_requests}, status: :ok)
     end
 

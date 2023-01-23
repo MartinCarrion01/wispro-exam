@@ -1180,8 +1180,8 @@ POST /api/v1/subscription_change_requests
     <th>Descripción</th>
   </tr>
   <tr>
-    <td>current_subscription_id</td>
-    <td>Representa el id de la suscripción activa que posee el cliente un plan</td>
+    <td>current_plan_id</td>
+    <td>Representa el id de un plan al cual el cliente actual esta suscrito actualmente</td>
   </tr>
   <tr>
     <td>new_plan_id</td>
@@ -1196,7 +1196,7 @@ curl -X POST 'http://127.0.0.1:3000/api/v1/subscription_change_requests' \
 -H 'Authorization: eyJhbGciOiJIUzI1NiJ9.eyJjbGllbnRfaWQiOjEsImV4cCI6MTY3Mzg4MDY5Mn0.oJ7TJuMDTDf0eNYXCeuX6YKwm7CUOmUgfGEe75iMfDM' \
 -H 'Content-Type: application/json' \
 --data-raw '{
-    "current_subscription_id": 1,
+    "current_plan_id": 1,
     "new_plan_id": 4
 }'
 ```
