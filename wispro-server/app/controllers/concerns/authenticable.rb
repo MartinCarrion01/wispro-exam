@@ -2,25 +2,13 @@ module Authenticable
     extend ActiveSupport::Concern
 
     included do
-        def authenticate_client
+        def authenticate_user
             token = retrieve_token(request)
             begin
                 decoded = jwt_decode(token)
-                @current_client = Client.find(decoded[:client_id])
+                @current_user = User.find(decoded[:user_id])
             rescue ActiveRecord::RecordNotFound => exception
-                render json: { message: "No se pudo encontrar un cliente usando el token de autorizacion" }, status: :unauthorized
-            rescue JWT::DecodeError => exception
-                render json: { message: exception.message }, status: :unauthorized
-            end
-        end
-    
-        def authenticate_provider
-            token = retrieve_token(request)
-            begin
-                decoded = jwt_decode(token)
-                @current_provider = Provider.find(decoded[:provider_id])
-            rescue ActiveRecord::RecordNotFound => exception
-                render json: { message: "No se pudo encontrar un proveedor usando el token de autorizacion" }, status: :unauthorized
+                render json: { message: "No se pudo encontrar un usuario usando el token de autorizacion" }, status: :unauthorized
             rescue JWT::DecodeError => exception
                 render json: { message: exception.message }, status: :unauthorized
             end

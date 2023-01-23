@@ -1,19 +1,12 @@
 class Api::V1::ProvidersController < ApplicationController
+    skip_before_action :authenticate_user, only: %i[get_plans]
+    before_action :authorize_provider_admin, only: %i[create]
+
     def create
-        provider = Provider.create!(provider_params)
+        provider = @current_user.create_provider!(provider_params)
         render(json: {provider: provider}, status: :created)
     end
 
-    def get_token
-        provider = Provider.find_by(id: params[:id])
-        if provider.present?
-            token = jwt_encode(provider_id: provider.id)
-            render(json: {token: token}, status: :ok)
-        else
-            render(json: {message: "El proveedor solicitado no existe"}, status: :not_found)
-        end
-    end
-    
     def get_plans
         providers = Provider.includes(:plans)
         formatted_providers = providers.as_json(only: [:id, :name],

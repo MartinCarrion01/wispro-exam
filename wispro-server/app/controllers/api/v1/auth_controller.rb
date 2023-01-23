@@ -1,12 +1,18 @@
 class Api::V1::AuthController < ApplicationController
+    skip_before_action :authenticate_user, only: %i[login]
+    
     def login
-        client = Client.find_by(username: params[:username])
-        if client && client.authenticate(params[:password])
-            token = jwt_encode(client_id: client.id)
+        if user.authenticate(params[:password])
+            token = jwt_encode(user_id: user.id)
             render(json: {token: token}, status: :ok)
         else
-            error = client ? "Contraseña incorrecta" : "El cliente ingresado no existe"
-            render(json: {message: error}, status: :unauthorized)
+            render(json: {message: "El nombre de usuario o contraseña ingresados son incorrectos"},
+                 status: :unauthorized)
         end
+    end
+
+    private
+    def user
+        @user ||= User.find_by(username: params[:username])
     end
 end
