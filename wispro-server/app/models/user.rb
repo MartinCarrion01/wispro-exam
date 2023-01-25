@@ -1,4 +1,6 @@
 class User < ApplicationRecord
+    attr_accessor :terms_of_service
+
     has_secure_password
 
     enum :user_type, %i[client provider_admin], default: :client
@@ -12,6 +14,7 @@ class User < ApplicationRecord
     validates :email, presence: true, uniqueness: true
     validates :first_name, presence: true
     validates :last_name, presence: true
+    validates :terms_of_service, presence: true, acceptance: true
 
     before_create -> { user_type = provider_admin }, if: -> { provider.present? }
 
