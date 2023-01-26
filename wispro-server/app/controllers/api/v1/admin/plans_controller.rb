@@ -1,6 +1,4 @@
-class Api::V1::PlansController < ApplicationController    
-    before_action :authorize_provider_admin, only: %i[create]
-
+class Api::V1::Admin::PlansController < Api::V1::Admin::BaseController    
     def create
         plan = provider.plans.create!(plan_params)
         render(json: {plan: plan}, status: :created)

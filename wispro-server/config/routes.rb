@@ -6,24 +6,29 @@ Rails.application.routes.draw do
   namespace :api do
     namespace :v1 do
       
+      namespace :admin do
+        resources :plans, only: %i[create] 
+
+        resources :subscription_requests, only: %i[update] 
+
+        resources :subscription_change_requests, only: %i[update]
+      end
+
       resources :providers, only: %i[create] do
-        member do
-          get :get_token
-        end
         resources :users, only: %i[create]
       end
       
-      resources :plans, only: %i[create] do
+      resources :plans, only: %i[] do
         resources :subscription_requests, only: %i[create]
       end
 
-      resources :subscription_requests, only: %i[index update] do
+      resources :subscription_requests, only: %i[index] do
         collection do
           get :rejected_last_month
         end
       end
 
-      resources :subscription_change_requests, only: %i[create update]
+      resources :subscription_change_requests, only: %i[create]
 
       resources :users, only: %i[create]
 
